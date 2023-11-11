@@ -9,7 +9,7 @@
     >
       <q-toolbar>
         <q-toolbar-title>
-          Vlbg MAP
+          Vorarlberg MAP
         </q-toolbar-title>
 
         <div>Quasar v{{ $q.version }}</div>

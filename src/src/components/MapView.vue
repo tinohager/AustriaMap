@@ -11,25 +11,18 @@
     width="600"
     height="800"
   >
-    <template
-      v-for="(item, index) in drawData"
-      :key="index"
-    >
+    <template v-for="(item, index) in drawData">
       <polygon
         v-if="!isSelected(item)"
+        :key="`polygon${index}`"
         :points="createPolygon(item.points)"
         :stroke-width="`0.5px`"
         :stroke="getStrokeColor(item)"
         :fill="getFillColor(item)"
       />
-    </template>
-
-    <template
-      v-for="(item, index) in drawData"
-      :key="index"
-    >
       <polygon
-        v-if="isSelected(item)"
+        v-else
+        :key="`polygon-selected${index}`"
         :points="createPolygon(item.points)"
         :stroke-width="`0.5px`"
         :stroke="getStrokeColor(item)"
@@ -45,9 +38,9 @@
       :fill="'none'"
     />
 
-    <template
+    <g
       v-for="(item, index) in drawData"
-      :key="`text${index}`"
+      :key="`group${index}`"
     >
       <text
         v-if="item.active || isSelected(item)"
@@ -59,12 +52,7 @@
         :fill="isSelected(item) ? '#000000' : '#bbbbbb'"
       >{{ item.name }}
       </text>
-    </template>
 
-    <template
-      v-for="(item, index) in drawData"
-      :key="`hovertext${index}`"
-    >
       <text
         v-if="isHover(item)"
         :x="getCenterPoint(item.points).x"
@@ -75,12 +63,7 @@
         fill="#000000"
       >{{ item.name }}
       </text>
-    </template>
 
-    <template
-      v-for="(item, index) in drawData"
-      :key="`clickarea${index}`"
-    >
       <polygon
         :points="createPolygon(item.points)"
         :stroke="'transparent'"
@@ -89,7 +72,8 @@
         @mouseover="mouseOver(item)"
         @mouseout="mouseOut()"
       />
-    </template>
+    </g>
+
   </svg>
 </template>
 
