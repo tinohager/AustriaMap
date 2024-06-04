@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-import MapView from 'components/MapView.vue'
+import VorarlbergMapView from 'components/VorarlbergMapView.vue'
+import AustriaMapView from 'components/AustriaMapView.vue'
 
 const selectedCity = ref('')
 
@@ -12,10 +13,11 @@ function cityChanged (name : string) {
 
 <template>
   <q-page class="row">
-    <div class="col-6">
-      <MapView @selectionchanged="cityChanged" />
+    <div class="col-9 bg-grey-1">
+      <VorarlbergMapView @selectionchanged="cityChanged" />
+      <AustriaMapView />
     </div>
-    <div class="col-6">
+    <div class="col-3">
       <h1>{{ selectedCity }}</h1>
     </div>
   </q-page>

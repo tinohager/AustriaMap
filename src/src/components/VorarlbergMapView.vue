@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
+import { MapItem, MapItemPoint } from 'src/models/MapItem'
+
 const emit = defineEmits(['selectionchanged'])
 
-const selected = ref('')
-const hover = ref('')
+const selected = ref<string | undefined>(undefined)
+const hover = ref<string | undefined>(undefined)
 
-const drawData = [
+const drawData : MapItem[] = [
   {
     name: 'Bartholomäberg',
     points: [{ x: 95.5198, y: 694.41 }, { x: 96.7197, y: 696.57 }, { x: 94.0798, y: 700.65 }, { x: 90.24, y: 702.81 }, { x: 84, y: 702.33 }, { x: 80.8801, y: 698.49 }, { x: 85.4399, y: 693.45 }, { x: 86.6399, y: 693.21 }, { x: 95.5198, y: 694.41 }],
@@ -489,7 +491,7 @@ const drawData = [
   }
 ]
 
-function createPolygon (points) {
+function createPolygon (points: MapItemPoint[]) {
   if (!points.length) {
     return ''
   }
@@ -501,25 +503,25 @@ function createPolygon (points) {
   return result
 }
 
-function mouseOver (item) {
+function mouseOver (item: MapItem) {
   hover.value = item.name
 }
 
 function mouseOut () {
-  hover.value = null
+  hover.value = undefined
 }
 
-function selectItem (name) {
+function selectItem (name: string) {
   if (selected.value === name) {
-    selected.value = null
-    emit('selectionchanged', null)
+    selected.value = undefined
+    emit('selectionchanged', undefined)
     return
   }
   selected.value = name
   emit('selectionchanged', name)
 }
 
-function isHover (item) {
+function isHover (item: MapItem) {
   if (item.name === hover.value) {
     return true
   }
@@ -527,7 +529,7 @@ function isHover (item) {
   return false
 }
 
-function isSelected (item) {
+function isSelected (item: MapItem) {
   if (item.name === selected.value) {
     return true
   }
@@ -535,7 +537,7 @@ function isSelected (item) {
   return false
 }
 
-function getFillColor (item) {
+function getFillColor (item: MapItem) {
   if (isSelected(item)) {
     return '#ffeb3b'
   }
@@ -550,7 +552,7 @@ function getFillColor (item) {
   return 'transparent'
 }
 
-function getStrokeColor (item) {
+function getStrokeColor (item: MapItem) {
   if (isSelected(item)) {
     return '#000000'
   }
@@ -558,7 +560,7 @@ function getStrokeColor (item) {
   return '#dddddd'
 }
 
-function getCenterPoint (points) {
+function getCenterPoint (points: MapItemPoint[]) {
   if (points && !points.length) {
     return { x: 0, y: 0 }
   }
@@ -567,8 +569,8 @@ function getCenterPoint (points) {
   let y = 0
 
   points.forEach(point => {
-    x += parseFloat(point.x)
-    y += parseFloat(point.y)
+    x += point.x
+    y += point.y
   })
 
   const centroid = { x: x / points.length, y: y / points.length }
