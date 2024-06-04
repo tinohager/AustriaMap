@@ -1,6 +1,6 @@
 # VorarlbergMap
 Interactive Vector Map of Vorarlberg - Vue.js (SVG)
 
-[MapView.vue](src/src/components/MapView.vue)
+[VorarlbergMapView.vue](src/src/components/VorarlbergMapView.vue)
 
 ![Vector Map](doc/preview.png)
