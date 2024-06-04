@@ -1,6 +1,10 @@
-# VorarlbergMap
+# Austria Map Collections
 Interactive Vector Map of Vorarlberg - Vue.js (SVG)
 
 [VorarlbergMapView.vue](src/src/components/VorarlbergMapView.vue)
 
-![Vector Map](doc/preview.png)
+## Vorarlberg
+![Vorarlberg Map](doc/preview.png)
+
+## Austria
+![Austria Map](doc/austria_map.svg)
