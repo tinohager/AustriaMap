@@ -1,24 +1,34 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-import VorarlbergMapView from 'components/VorarlbergMapView.vue'
-import AustriaMapView from 'components/AustriaMapView.vue'
+import { dataProvider as austriaDataProvider } from '../dataProviders/austriaDataProvider'
+import { dataProvider as vorarlbergDataProvider } from '../dataProviders/vorarlbergDataProvider'
 
-const selectedCity = ref('')
+import SvgMapView from 'components/SvgMapView.vue'
+// import VorarlbergMapView from 'components/VorarlbergMapView.vue'
 
-function cityChanged (name : string) {
-  selectedCity.value = name
-}
+// const selectedCity = ref('')
+
+// function cityChanged (name : string) {
+//   selectedCity.value = name
+// }
 </script>
 
 <template>
   <q-page class="row">
     <div class="col-9 bg-grey-1">
-      <VorarlbergMapView @selectionchanged="cityChanged" />
-      <AustriaMapView />
+      <!-- <VorarlbergMapView @selectionchanged="cityChanged" /> -->
+      <h2>Vorarlberg</h2>
+      <div class="bg-grey-10">
+        <SvgMapView :map-items="vorarlbergDataProvider.drawData" />
+      </div>
+      <h2>Austria</h2>
+      <div class="bg-grey-10">
+        <SvgMapView :map-items="austriaDataProvider.drawData" />
+      </div>
     </div>
     <div class="col-3">
-      <h1>{{ selectedCity }}</h1>
+      <!-- <h1>{{ selectedCity }}</h1> -->
     </div>
   </q-page>
 </template>
