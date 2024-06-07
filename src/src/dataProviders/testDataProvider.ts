@@ -4,12 +4,12 @@ import { MapItem } from 'src/models/MapItem'
 const mapItems : MapItem[] = []
 
 const rasterSize = 20
-const rectangleSize = 10
+const rectangleSize = 100
 
-for (let x = 1; x <= rasterSize; x++) {
-  for (let y = 1; y <= rasterSize; y++) {
-    const calculatedX = 10 * x
-    const calculatedY = 10 * y
+for (let x = 0; x < rasterSize; x++) {
+  for (let y = 0; y < rasterSize; y++) {
+    const calculatedX = rectangleSize * x
+    const calculatedY = rectangleSize * y
 
     const x1 = calculatedX
     const x2 = calculatedX + rectangleSize
@@ -22,7 +22,7 @@ for (let x = 1; x <= rasterSize; x++) {
     const y4 = calculatedY + rectangleSize
 
     mapItems.push({
-      name: `R${y}/${x}`,
+      name: `R${y + 1}/${x + 1}`,
       points: [{ x: x1, y: y1 }, { x: x2, y: y2 }, { x: x3, y: y3 }, { x: x4, y: y4 }]
     })
   }

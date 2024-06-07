@@ -15,6 +15,8 @@ const props = defineProps<Props>()
 
 const selected = ref<string | undefined>(undefined)
 const hover = ref<string | undefined>(undefined)
+const svgRef = ref()
+const point1 = ref()
 
 function createPolygon (points: MapItemPoint[]) {
   if (!points.length) {
@@ -111,7 +113,9 @@ function calculateViewBox () {
   const width = xMax - xMin
   const height = yMax - yMin
 
-  return `${xMin - 10} ${yMin - 10} ${width + 10} ${height + 10}`
+  const padding = 0
+
+  return `${xMin - padding} ${yMin - padding} ${width + padding} ${height + padding}`
 }
 
 const currentPosition = ref({
@@ -155,6 +159,16 @@ function wheel (e: WheelEvent) {
     tempZoom.value -= ZOOM_SPEED
   }
   tempZoom.value = Math.min(Math.max(Math.round(tempZoom.value), 1), 10)
+
+  let point = svgRef.value.createSVGPoint()
+
+  point.x = e.clientX
+  point.y = e.clientY
+  point = point.matrixTransform(svgRef.value.getCTM().inverse())
+  console.log(point)
+
+  point1.value = point
+
   emit('zoomchanged', tempZoom.value)
   e.preventDefault()
   e.stopPropagation()
@@ -162,19 +176,25 @@ function wheel (e: WheelEvent) {
 </script>
 
 <template>
+  CP:{{ currentPosition }}<br>
+  SP:{{ startPosition }}<br>
+  VB:{{ calculateViewBox() }}<br>
+  Zoom: {{ zoom }} | {{ tempZoom }}}<br>
+  {{ transformStyle }}<br>
+  {{ point1?.x }}
   <div
-    style="width: 100%; height: 100%; overflow: hidden;"
+    style="width: 2000px; overflow: hidden;"
     @mousedown="mousedown"
     @mousemove="mousemove"
     @wheel="wheel"
   >
     <svg
       id="SvgMap"
+      ref="svgRef"
       version="1.0"
       xmlns="http://www.w3.org/2000/svg"
       :viewBox="calculateViewBox()"
-      width="800"
-      height="650"
+      style="background-color: brown;"
       :style="{transform: transformStyle}"
     >
       <template v-for="(item, index) in mapDataProvider.mapItems">
