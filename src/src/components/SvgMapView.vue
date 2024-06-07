@@ -139,9 +139,10 @@ function mousemove (e: MouseEvent) {
     currentPosition.value.y = e.clientY - startPosition.y
   }
 }
-function mouseup () {
+
+document.addEventListener('mouseup', () => {
   isMouseDown = false
-}
+})
 
 const ZOOM_SPEED = 1
 
@@ -161,75 +162,78 @@ function wheel (e: WheelEvent) {
 </script>
 
 <template>
-  <svg
-    id="SvgMap"
-    version="1.0"
-    xmlns="http://www.w3.org/2000/svg"
-    :viewBox="calculateViewBox()"
-    width="800"
-    height="650"
-    :style="{transform: transformStyle}"
+  <div
+    style="width: 100%; height: 100%; overflow: hidden;"
     @mousedown="mousedown"
-    @mouseup="mouseup"
     @mousemove="mousemove"
     @wheel="wheel"
   >
-    <template v-for="(item, index) in mapDataProvider.mapItems">
-      <polygon
-        v-if="!isSelected(item)"
-        :key="`polygon${index}`"
-        :points="createPolygon(item.points)"
-        :stroke-width="`0.5px`"
-        :stroke="getStrokeColor(item)"
-        :fill="getFillColor(item)"
-      />
-      <polygon
-        v-else
-        :key="`polygon-selected${index}`"
-        :points="createPolygon(item.points)"
-        :stroke-width="`0.5px`"
-        :stroke="getStrokeColor(item)"
-        :fill="getFillColor(item)"
-      />
-    </template>
-
-    <g
-      v-for="(item, index) in mapDataProvider.mapItems"
-      :key="`group${index}`"
+    <svg
+      id="SvgMap"
+      version="1.0"
+      xmlns="http://www.w3.org/2000/svg"
+      :viewBox="calculateViewBox()"
+      width="800"
+      height="650"
+      :style="{transform: transformStyle}"
     >
-      <!-- <text
-        v-if="item.active || isSelected(item)"
-        :x="getCenterPoint(item.points).x"
-        :y="getCenterPoint(item.points).y"
-        dominant-baseline="middle"
-        text-anchor="middle"
-        :font-size="hover ? '0.8em' : '1.0em'"
-        :fill="isSelected(item) ? '#000000' : '#bbbbbb'"
-      >{{ item.name }}
-      </text> -->
+      <template v-for="(item, index) in mapDataProvider.mapItems">
+        <polygon
+          v-if="!isSelected(item)"
+          :key="`polygon${index}`"
+          :points="createPolygon(item.points)"
+          :stroke-width="`0.5px`"
+          :stroke="getStrokeColor(item)"
+          :fill="getFillColor(item)"
+        />
+        <polygon
+          v-else
+          :key="`polygon-selected${index}`"
+          :points="createPolygon(item.points)"
+          :stroke-width="`0.5px`"
+          :stroke="getStrokeColor(item)"
+          :fill="getFillColor(item)"
+        />
+      </template>
 
-      <text
-        v-if="isHover(item)"
-        :x="getCenterPoint(item.points).x"
-        :y="getCenterPoint(item.points).y"
-        dominant-baseline="middle"
-        text-anchor="middle"
-        font-size="1.5em"
-        fill="#000000"
-      >{{ item.name }}
-      </text>
+      <g
+        v-for="(item, index) in mapDataProvider.mapItems"
+        :key="`group${index}`"
+      >
+        <!-- <text
+                v-if="item.active || isSelected(item)"
+                :x="getCenterPoint(item.points).x"
+                :y="getCenterPoint(item.points).y"
+                dominant-baseline="middle"
+                text-anchor="middle"
+                :font-size="hover ? '0.8em' : '1.0em'"
+                :fill="isSelected(item) ? '#000000' : '#bbbbbb'"
+            >{{ item.name }}
+            </text> -->
 
-      <polygon
-        :points="createPolygon(item.points)"
-        :stroke="'transparent'"
-        :fill="'transparent'"
-        @click="selectItem(item.name)"
-        @mouseover="mouseOver(item)"
-        @mouseout="mouseOut()"
-      />
-    </g>
+        <text
+          v-if="isHover(item)"
+          :x="getCenterPoint(item.points).x"
+          :y="getCenterPoint(item.points).y"
+          dominant-baseline="middle"
+          text-anchor="middle"
+          font-size="1.5em"
+          fill="#000000"
+        >{{ item.name }}
+        </text>
 
-  </svg>
+        <polygon
+          :points="createPolygon(item.points)"
+          :stroke="'transparent'"
+          :fill="'transparent'"
+          @click="selectItem(item.name)"
+          @mouseover="mouseOver(item)"
+          @mouseout="mouseOut()"
+        />
+      </g>
+
+    </svg>
+  </div>
 </template>
 
 <style scoped>
