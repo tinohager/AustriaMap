@@ -8,3 +8,17 @@ Interactive Vector Map of Vorarlberg - Vue.js (SVG)
 
 ## Austria
 ![Austria Map](doc/austria_map.svg)
+
+## Toolset
+
+### Coding / Development
+
+https://quasar.dev/start/quasar-cli
+```
+$ npm i -g @quasar/cli
+$ npm init quasar
+```
+
+### SVG Editing and Optimize
+- https://inkscape.org
+- https://svgomg.net/
