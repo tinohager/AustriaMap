@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 import { MapItem, MapItemPoint } from 'src/models/MapItem'
 import { MapDataProvider } from 'src/models/MapDataProvider'
 
-const emit = defineEmits(['selectionchanged'])
+const emit = defineEmits(['selectionchanged', 'zoomchanged'])
 
 export interface Props {
   mapDataProvider: MapDataProvider
+  zoom?: number
 }
 
 const props = defineProps<Props>()
@@ -113,6 +114,50 @@ function calculateViewBox () {
   return `${xMin} ${yMin} ${width} ${height}`
 }
 
+const currentPosition = ref({
+  x: 0,
+  y: 0
+})
+const startPosition = {
+  x: 0,
+  y: 0
+}
+
+const transformStyle = computed(() => {
+  return `translate(${currentPosition.value.x}px, ${currentPosition.value.y}px) scale(${tempZoom.value}.0)`
+})
+
+let isMouseDown = false
+function mousedown (e: MouseEvent) {
+  isMouseDown = true
+  startPosition.x = e.clientX - currentPosition.value.x
+  startPosition.y = e.clientY - currentPosition.value.y
+}
+function mousemove (e: MouseEvent) {
+  if (isMouseDown) {
+    currentPosition.value.x = e.clientX - startPosition.x
+    currentPosition.value.y = e.clientY - startPosition.y
+  }
+}
+function mouseup () {
+  isMouseDown = false
+}
+
+const ZOOM_SPEED = 1
+
+const tempZoom = ref(props.zoom || 1)
+
+function wheel (e: WheelEvent) {
+  if (e.deltaY <= 0) {
+    tempZoom.value += ZOOM_SPEED
+  } else {
+    tempZoom.value -= ZOOM_SPEED
+  }
+  tempZoom.value = Math.min(Math.max(Math.round(tempZoom.value), 1), 10)
+  emit('zoomchanged', tempZoom.value)
+  e.preventDefault()
+  e.stopPropagation()
+}
 </script>
 
 <template>
@@ -123,6 +168,11 @@ function calculateViewBox () {
     :viewBox="calculateViewBox()"
     width="800"
     height="650"
+    :style="{transform: transformStyle}"
+    @mousedown="mousedown"
+    @mouseup="mouseup"
+    @mousemove="mousemove"
+    @wheel="wheel"
   >
     <template v-for="(item, index) in mapDataProvider.mapItems">
       <polygon
