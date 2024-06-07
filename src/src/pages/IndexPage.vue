@@ -15,6 +15,7 @@ import SvgMapView from 'components/SvgMapView.vue'
 
 const splitterModel = ref(20)
 const tab = ref('austria')
+const zoom = ref(1)
 </script>
 
 <template>
@@ -48,7 +49,10 @@ const tab = ref('austria')
           class="bg-grey"
         >
           <q-tab-panel name="vorarlberg">
-            <SvgMapView :map-data-provider="vorarlbergDataProvider" />
+            <SvgMapView
+              :map-data-provider="vorarlbergDataProvider"
+              :zoom="zoom"
+            />
           </q-tab-panel>
 
           <q-tab-panel name="austria">
