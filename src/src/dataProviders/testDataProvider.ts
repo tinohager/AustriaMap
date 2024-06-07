@@ -1,24 +1,31 @@
 import { MapDataProvider } from 'src/models/MapDataProvider'
 import { MapItem } from 'src/models/MapItem'
 
-const mapItems : MapItem[] = [
-  {
-    name: 'Test 1',
-    points: [{ x: 10, y: 10 }, { x: 20, y: 10 }, { x: 20, y: 20 }, { x: 10, y: 20 }]
-  },
-  {
-    name: 'Test 2',
-    points: [{ x: 20, y: 10 }, { x: 30, y: 10 }, { x: 30, y: 20 }, { x: 20, y: 20 }]
-  },
-  {
-    name: 'Test 3',
-    points: [{ x: 10, y: 20 }, { x: 20, y: 20 }, { x: 20, y: 30 }, { x: 10, y: 30 }]
-  },
-  {
-    name: 'Test 4',
-    points: [{ x: 20, y: 20 }, { x: 30, y: 20 }, { x: 30, y: 30 }, { x: 20, y: 30 }]
-  }
+const mapItems : MapItem[] = []
 
-]
+const rasterSize = 20
+const rectangleSize = 10
+
+for (let x = 1; x <= rasterSize; x++) {
+  for (let y = 1; y <= rasterSize; y++) {
+    const calculatedX = 10 * x
+    const calculatedY = 10 * y
+
+    const x1 = calculatedX
+    const x2 = calculatedX + rectangleSize
+    const x3 = calculatedX + rectangleSize
+    const x4 = calculatedX
+
+    const y1 = calculatedY
+    const y2 = calculatedY
+    const y3 = calculatedY + rectangleSize
+    const y4 = calculatedY + rectangleSize
+
+    mapItems.push({
+      name: `R${y}/${x}`,
+      points: [{ x: x1, y: y1 }, { x: x2, y: y2 }, { x: x3, y: y3 }, { x: x4, y: y4 }]
+    })
+  }
+}
 
 export const dataProvider : MapDataProvider = { mapItems }

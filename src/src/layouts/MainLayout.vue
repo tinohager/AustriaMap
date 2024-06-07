@@ -9,7 +9,7 @@
     >
       <q-toolbar>
         <q-toolbar-title>
-          Austria Map
+          Austria Magic Map
         </q-toolbar-title>
 
         <div>Quasar v{{ $q.version }}</div>
