@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-
 import { dataProvider as austriaDataProvider } from '../dataProviders/austriaDataProvider'
 import { dataProvider as vorarlbergDataProvider } from '../dataProviders/vorarlbergDataProvider'
 
@@ -20,11 +18,11 @@ import SvgMapView from 'components/SvgMapView.vue'
       <!-- <VorarlbergMapView @selectionchanged="cityChanged" /> -->
       <h2>Vorarlberg</h2>
       <div class="bg-grey-10">
-        <SvgMapView :map-items="vorarlbergDataProvider.drawData" />
+        <SvgMapView :map-data-provider="vorarlbergDataProvider" />
       </div>
       <h2>Austria</h2>
       <div class="bg-grey-10">
-        <SvgMapView :map-items="austriaDataProvider.drawData" />
+        <SvgMapView :map-data-provider="austriaDataProvider" />
       </div>
     </div>
     <div class="col-3">

@@ -2,11 +2,12 @@
 import { ref } from 'vue'
 
 import { MapItem, MapItemPoint } from 'src/models/MapItem'
+import { MapDataProvider } from 'src/models/MapDataProvider'
 
 const emit = defineEmits(['selectionchanged'])
 
 export interface Props {
-  mapItems: MapItem[]
+  mapDataProvider: MapDataProvider
 }
 
 const props = defineProps<Props>()
@@ -69,9 +70,9 @@ function getFillColor (item: MapItem) {
     return '#dddddd'
   }
 
-  if (item.active) {
-    return '#fff'
-  }
+  // if (item.active) {
+  //   return '#fff'
+  // }
   return 'transparent'
 }
 
@@ -101,10 +102,10 @@ function getCenterPoint (points: MapItemPoint[]) {
 }
 
 function calculateViewBox () {
-  const xMin = Math.min(...props.mapItems.map(mapItem => Math.min(...mapItem.points.map(point => point.x))))
-  const xMax = Math.max(...props.mapItems.map(mapItem => Math.max(...mapItem.points.map(point => point.x))))
-  const yMin = Math.min(...props.mapItems.map(mapItem => Math.min(...mapItem.points.map(point => point.y))))
-  const yMax = Math.max(...props.mapItems.map(mapItem => Math.max(...mapItem.points.map(point => point.y))))
+  const xMin = Math.min(...props.mapDataProvider.mapItems.map(mapItem => Math.min(...mapItem.points.map(point => point.x))))
+  const xMax = Math.max(...props.mapDataProvider.mapItems.map(mapItem => Math.max(...mapItem.points.map(point => point.x))))
+  const yMin = Math.min(...props.mapDataProvider.mapItems.map(mapItem => Math.min(...mapItem.points.map(point => point.y))))
+  const yMax = Math.max(...props.mapDataProvider.mapItems.map(mapItem => Math.max(...mapItem.points.map(point => point.y))))
 
   const width = xMax - xMin
   const height = yMax - yMin
@@ -123,7 +124,7 @@ function calculateViewBox () {
     width="800"
     height="650"
   >
-    <template v-for="(item, index) in mapItems">
+    <template v-for="(item, index) in mapDataProvider.mapItems">
       <polygon
         v-if="!isSelected(item)"
         :key="`polygon${index}`"
@@ -143,10 +144,10 @@ function calculateViewBox () {
     </template>
 
     <g
-      v-for="(item, index) in mapItems"
+      v-for="(item, index) in mapDataProvider.mapItems"
       :key="`group${index}`"
     >
-      <text
+      <!-- <text
         v-if="item.active || isSelected(item)"
         :x="getCenterPoint(item.points).x"
         :y="getCenterPoint(item.points).y"
@@ -155,7 +156,7 @@ function calculateViewBox () {
         :font-size="hover ? '0.8em' : '1.0em'"
         :fill="isSelected(item) ? '#000000' : '#bbbbbb'"
       >{{ item.name }}
-      </text>
+      </text> -->
 
       <text
         v-if="isHover(item)"

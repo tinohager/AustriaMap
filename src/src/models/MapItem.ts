@@ -6,5 +6,4 @@ export interface MapItemPoint {
 export interface MapItem {
   name: string
   points: MapItemPoint[]
-  active: boolean
 }

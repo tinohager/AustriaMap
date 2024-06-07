@@ -1,6 +1,7 @@
+import { MapDataProvider } from 'src/models/MapDataProvider'
 import { MapItem } from 'src/models/MapItem'
 
-const drawData : MapItem[] = [
+const mapItems : MapItem[] = [
   {
     name: 'Bartholomäberg',
     points: [{ x: 95.5198, y: 694.41 }, { x: 96.7197, y: 696.57 }, { x: 94.0798, y: 700.65 }, { x: 90.24, y: 702.81 }, { x: 84, y: 702.33 }, { x: 80.8801, y: 698.49 }, { x: 85.4399, y: 693.45 }, { x: 86.6399, y: 693.21 }, { x: 95.5198, y: 694.41 }]
@@ -388,4 +389,4 @@ const drawData : MapItem[] = [
   }
 ]
 
-export const dataProvider = { drawData }
+export const dataProvider : MapDataProvider = { mapItems }
