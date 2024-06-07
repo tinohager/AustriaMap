@@ -155,6 +155,9 @@ const ZOOM_SPEED = 1
 const tempZoom = ref(props.zoom || 1)
 
 function wheel (e: WheelEvent) {
+  e.preventDefault()
+  e.stopPropagation()
+  const oldZoom = tempZoom.value
   if (e.deltaY <= 0) {
     tempZoom.value += ZOOM_SPEED
   } else {
@@ -185,9 +188,15 @@ function wheel (e: WheelEvent) {
 
   point1.value = point
 
+  const deltaNew = {
+    x: (point.x * (tempZoom.value / oldZoom)) - point.x,
+    y: (point.y * (tempZoom.value / oldZoom)) - point.y
+  }
+
+  currentPosition.value.x -= deltaNew.x
+  currentPosition.value.y -= deltaNew.y
+
   emit('zoomchanged', tempZoom.value)
-  e.preventDefault()
-  e.stopPropagation()
 }
 </script>
 
@@ -212,7 +221,7 @@ function wheel (e: WheelEvent) {
       version="1.0"
       xmlns="http://www.w3.org/2000/svg"
       :viewBox="calculateViewBox()"
-      style="background-color: brown;"
+      style="background-color: brown; transform-origin: 0 0;"
       :style="{transform: transformStyle}"
     >
       <template v-for="(item, index) in mapDataProvider.mapItems">
