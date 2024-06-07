@@ -15,8 +15,10 @@ const props = defineProps<Props>()
 
 const selected = ref<string | undefined>(undefined)
 const hover = ref<string | undefined>(undefined)
-const svgRef = ref()
+const svgRef = ref<SVGSVGElement>()
+const svgHomeRef = ref<HTMLDivElement>()
 const point1 = ref()
+const point2 = ref({ x: 0, y: 0 })
 
 function createPolygon (points: MapItemPoint[]) {
   if (!points.length) {
@@ -160,11 +162,25 @@ function wheel (e: WheelEvent) {
   }
   tempZoom.value = Math.min(Math.max(Math.round(tempZoom.value), 1), 10)
 
-  let point = svgRef.value.createSVGPoint()
+  console.log(e)
 
-  point.x = e.clientX
-  point.y = e.clientY
-  point = point.matrixTransform(svgRef.value.getCTM().inverse())
+  point2.value.x = e.clientX
+  point2.value.y = e.clientY
+
+  let point = svgRef.value?.createSVGPoint()
+  if (!point) {
+    return
+  }
+
+  const matrix = svgRef.value?.getScreenCTM()
+  if (!matrix) {
+    return
+  }
+  console.log(svgRef.value?.getScreenCTM())
+
+  point.x = e.clientX - matrix?.e
+  point.y = e.clientY - matrix?.f
+  point = point.matrixTransform(svgRef.value.getCTM())
   console.log(point)
 
   point1.value = point
@@ -181,12 +197,14 @@ function wheel (e: WheelEvent) {
   VB:{{ calculateViewBox() }}<br>
   Zoom: {{ zoom }} | {{ tempZoom }}}<br>
   {{ transformStyle }}<br>
-  {{ point1?.x }}
+  WEP:{{ point2.x }}/{{ point2.y }}<br>
+  WEP:{{ point1?.x }}/{{ point1?.y }}
   <div
+    ref="svgHomeRef"
     style="width: 2000px; overflow: hidden;"
     @mousedown="mousedown"
     @mousemove="mousemove"
-    @wheel="wheel"
+    @wheel.prevent="wheel"
   >
     <svg
       id="SvgMap"
