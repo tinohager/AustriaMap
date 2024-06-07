@@ -6,6 +6,8 @@ import { MapDataProvider } from 'src/models/MapDataProvider'
 
 const emit = defineEmits(['selectionchanged', 'zoomchanged'])
 
+const debugRef = ref(false)
+
 export interface Props {
   mapDataProvider: MapDataProvider
   zoom?: number
@@ -198,16 +200,21 @@ function wheel (e: WheelEvent) {
 
   emit('zoomchanged', tempZoom.value)
 }
+
 </script>
 
 <template>
-  CP:{{ currentPosition }}<br>
-  SP:{{ startPosition }}<br>
-  VB:{{ calculateViewBox() }}<br>
-  Zoom: {{ zoom }} | {{ tempZoom }}}<br>
-  {{ transformStyle }}<br>
-  WEP:{{ point2.x }}/{{ point2.y }}<br>
-  WEP:{{ point1?.x }}/{{ point1?.y }}
+  <div
+    v-if="debugRef"
+  >
+    CP:{{ currentPosition }}<br>
+    SP:{{ startPosition }}<br>
+    VB:{{ calculateViewBox() }}<br>
+    Zoom: {{ props.zoom }} | {{ tempZoom }}<br>
+    {{ transformStyle }}<br>
+    WEP:{{ point2.x }}/{{ point2.y }}<br>
+    WEP:{{ point1?.x }}/{{ point1?.y }}
+  </div>
   <div
     ref="svgHomeRef"
     style="width: 2000px; overflow: hidden;"
