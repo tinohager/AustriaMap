@@ -1,9 +1,9 @@
 {
-  "name": "vlbgmap",
+  "name": "austriamap",
   "version": "0.0.1",
-  "description": "A Quasar Project",
-  "productName": "Quasar App",
-  "author": "Tino Hager <tino.hager@nager.at>",
+  "description": "Svg Maps for Austria",
+  "productName": "Austria Map",
+  "author": "Tino Hager <tino.hager@nager.at>, Florian Bischof <design.falke@gmail.com>",
   "private": true,
   "scripts": {
     "lint": "eslint --ext .js,.ts,.vue ./",
