@@ -3,6 +3,7 @@ import { ref } from 'vue'
 
 import { dataProvider as austriaDataProvider } from '../dataProviders/austriaDataProvider'
 import { dataProvider as vorarlbergDataProvider } from '../dataProviders/vorarlbergDataProvider'
+import { dataProvider as testDataProvider } from '../dataProviders/testDataProvider'
 
 import SvgMapView from 'components/SvgMapView.vue'
 // import VorarlbergMapView from 'components/VorarlbergMapView.vue'
@@ -39,6 +40,11 @@ const zoom = ref(1)
             icon="map"
             label="Austria"
           />
+          <q-tab
+            name="test"
+            icon="map"
+            label="Test"
+          />
         </q-tabs>
       </template>
 
@@ -57,6 +63,10 @@ const zoom = ref(1)
 
           <q-tab-panel name="austria">
             <SvgMapView :map-data-provider="austriaDataProvider" />
+          </q-tab-panel>
+
+          <q-tab-panel name="test">
+            <SvgMapView :map-data-provider="testDataProvider" />
           </q-tab-panel>
         </q-tab-panels>
       </template>

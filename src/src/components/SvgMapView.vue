@@ -111,7 +111,7 @@ function calculateViewBox () {
   const width = xMax - xMin
   const height = yMax - yMin
 
-  return `${xMin} ${yMin} ${width} ${height}`
+  return `${xMin - 10} ${yMin - 10} ${width + 10} ${height + 10}`
 }
 
 const currentPosition = ref({
@@ -182,7 +182,8 @@ function wheel (e: WheelEvent) {
           v-if="!isSelected(item)"
           :key="`polygon${index}`"
           :points="createPolygon(item.points)"
-          :stroke-width="`0.5px`"
+          vector-effect="non-scaling-stroke"
+          :stroke-width="`0.1vw`"
           :stroke="getStrokeColor(item)"
           :fill="getFillColor(item)"
         />
