@@ -20,9 +20,30 @@ const props = defineProps<Props>()
 const selected = ref<string | undefined>(undefined)
 const hover = ref<string | undefined>(undefined)
 const svgRef = ref<SVGSVGElement>()
-const svgHomeRef = ref<HTMLDivElement>()
 const point1 = ref()
 const point2 = ref({ x: 0, y: 0 })
+
+const pointCircle1 = ref({ x: 0, y: 0 })
+const pointCircle2 = ref({ x: 0, y: 0 })
+
+const ZOOM_SPEED = 0.2
+const tempZoom = ref(props.zoom || 1)
+
+const mousePosition = ref({
+  x: 0,
+  y: 0
+})
+const currentPosition = ref({
+  x: 0,
+  y: 0
+})
+const startPosition = ref({
+  x: 0,
+  y: 0
+})
+
+const appendedCircle = false
+const isMouseDown = ref(false)
 
 function createPolygon (points: MapItemPoint[]) {
   if (!points.length) {
@@ -127,256 +148,272 @@ function calculateViewBox () {
   return `${x} ${y} ${width} ${height}`
 }
 
-const mousePosition = ref({
-  x: 0,
-  y: 0
-})
-const currentPosition = ref({
-  x: 0,
-  y: 0
-})
-const startPosition = {
-  x: 0,
-  y: 0
-}
-
 const transformStyle = computed(() => {
   return `scale(${tempZoom.value})`
 })
 
-let isMouseDown = false
 function mousedown (e: MouseEvent) {
-  isMouseDown = true
-  startPosition.x = e.clientX - currentPosition.value.x
-  startPosition.y = e.clientY - currentPosition.value.y
+  isMouseDown.value = true
 
-  const matrix = svgRef.value?.getScreenCTM()
-  if (!matrix) {
-    return
-  }
-  startPosition.x = e.clientX - matrix?.e
-  startPosition.y = e.clientY - matrix?.f
+  const svgPosition = convertScreenPosition(e.clientX, e.clientY)
+
+  startPosition.value.x = svgPosition.x
+  startPosition.value.y = svgPosition.y
+
+  // const matrix = svgRef.value?.getScreenCTM()
+  // if (!matrix) {
+  //   return
+  // }
+  // startPosition.x = e.clientX - matrix?.e
+  // startPosition.y = e.clientY - matrix?.f
 //   startPosition.x = matrix?.e
 //   startPosition.y = matrix?.f
 }
 
-const circle = ref()
-circle.value = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+function convertScreenPosition (x: number, y: number) {
+  const matrix = svgRef.value?.getScreenCTM()
+  if (!matrix) {
+    return { x: 0, y: 0 }
+  }
 
-const circleGreen = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+  const svgPoint1 = svgRef.value?.createSVGPoint()
+  if (svgPoint1) {
+    svgPoint1.x = x
+    svgPoint1.y = y
+    const svgCoords = svgPoint1.matrixTransform(matrix.inverse())
 
-let appendedCircle = false
-function mousemove (e: MouseEvent) {
+    return { x: svgCoords.x, y: svgCoords.y }
+  }
+
+  return { x: 0, y: 0 }
+}
+
+function setCirclePosition (x: number, y: number) {
   const matrix = svgRef.value?.getScreenCTM()
   if (!matrix) {
     return
   }
-  const point = {}
-  point.x = e.clientX - matrix?.e
-  point.y = e.clientY - matrix?.f
-  mousePosition.value = { x: e.clientX, y: e.clientY }
-  //   mousePosition.value = point
 
-  // Calculate the SVG coordinates
-  const svgPoint = svgRef.value.createSVGPoint()
-  svgPoint.x = e.clientX
-  svgPoint.y = e.clientY
-  const svgCoords = svgPoint.matrixTransform(matrix.inverse())
+  pointCircle1.value.x = x
+  pointCircle1.value.y = y
 
-  // Create the circle
-  circle.value.setAttribute('cx', svgCoords.x)
-  circle.value.setAttribute('cy', svgCoords.y)
-  circle.value.setAttribute('r', 10)
-  circle.value.setAttribute('fill', 'blue')
+  const svgPoint1 = svgRef.value?.createSVGPoint()
+  if (svgPoint1) {
+    svgPoint1.x = x
+    svgPoint1.y = y
+    const svgCoords = svgPoint1.matrixTransform(matrix.inverse())
 
-  // Create the circle
-  circleGreen.setAttribute('cx', svgCoords.x)
-  circleGreen.setAttribute('cy', svgCoords.y)
-  circleGreen.setAttribute('r', 10)
-  circleGreen.setAttribute('fill', 'green')
+    pointCircle2.value.x = svgCoords.x
+    pointCircle2.value.y = svgCoords.y
+  }
+}
 
-  if (!appendedCircle) {
-    // Append the circle to the SVG
-    svgRef.value.appendChild(circle.value)
-    svgRef.value.appendChild(circleGreen)
-    appendedCircle = true
+function mousemove (e: MouseEvent) {
+  setCirclePosition(e.clientX, e.clientY)
+
+  if (isMouseDown.value) {
+    currentPosition.value.x += pointCircle2.value.x - startPosition.value.x
+    currentPosition.value.y += pointCircle2.value.y - startPosition.value.y
   }
 
-  if (isMouseDown) {
-    currentPosition.value.x += point.x - startPosition.x
-    currentPosition.value.y += point.y - startPosition.y
-  }
+  // const matrix = svgRef.value?.getScreenCTM()
+  // if (!matrix) {
+  //   return
+  // }
 
-  /** ************** */
+  // pointCircle1.value.x = e.clientX
+  // pointCircle1.value.y = e.clientY
 
-  const svgPoint2 = svgRef.value.createSVGPoint()
-  svgPoint2.x = e.clientX
-  svgPoint2.y = e.clientY
-  const svgCoords2 = svgPoint2.matrixTransform(matrix.inverse())
+  // const point = {}
+  // point.x = e.clientX - matrix?.e
+  // point.y = e.clientY - matrix?.f
+  // mousePosition.value = { x: e.clientX, y: e.clientY }
+  // //   mousePosition.value = point
 
-  svgCoords2.x = svgCoords.x - (svgCoords.x * 0)
-  svgCoords2.y = svgCoords.y - (svgCoords.y * 0)
+  // // Calculate the SVG coordinates
+  // const svgPoint = svgRef.value.createSVGPoint()
+  // svgPoint.x = e.clientX
+  // svgPoint.y = e.clientY
+  // const svgCoords = svgPoint.matrixTransform(matrix.inverse())
 
-  const newScreenCoords = svgCoords2.matrixTransform(matrix)
+  // if (!appendedCircle) {
+  //   // Append the circle to the SVG
+
+  //   appendedCircle = true
+  // }
+
+  // if (isMouseDown.value) {
+  //   currentPosition.value.x += point.x - startPosition.x
+  //   currentPosition.value.y += point.y - startPosition.y
+  // }
+
+  // /** ************** */
+
+  // const svgPoint2 = svgRef.value.createSVGPoint()
+  // svgPoint2.x = e.clientX
+  // svgPoint2.y = e.clientY
+  // const svgCoords2 = svgPoint2.matrixTransform(matrix.inverse())
+
+  // svgCoords2.x = svgCoords.x - (svgCoords.x * 0)
+  // svgCoords2.y = svgCoords.y - (svgCoords.y * 0)
+
+  // const newScreenCoords = svgCoords2.matrixTransform(matrix)
 
 //   console.log({ x: e.clientX, y: e.clientY }, { x: newScreenCoords.x, ny: newScreenCoords.y })
 }
 
+function wheelChanged (e: WheelEvent) {
+  setCirclePosition(e.clientX, e.clientY)
+}
+
 document.addEventListener('mouseup', () => {
-  isMouseDown = false
+  isMouseDown.value = false
 })
 
-const ZOOM_SPEED = 0.2
+// function wheel4 (e: WheelEvent) {
+//   e.preventDefault()
+//   e.stopPropagation()
+//   const oldZoom = tempZoom.value
+//   if (e.deltaY <= 0) {
+//     tempZoom.value += ZOOM_SPEED
+//   } else {
+//     tempZoom.value -= ZOOM_SPEED
+//   }
+//   tempZoom.value = Math.min(Math.max(Math.round(tempZoom.value), 1), 10)
 
-const tempZoom = ref(props.zoom || 1)
+//   console.log(e)
 
-function wheel4 (e: WheelEvent) {
-  e.preventDefault()
-  e.stopPropagation()
-  const oldZoom = tempZoom.value
-  if (e.deltaY <= 0) {
-    tempZoom.value += ZOOM_SPEED
-  } else {
-    tempZoom.value -= ZOOM_SPEED
-  }
-  tempZoom.value = Math.min(Math.max(Math.round(tempZoom.value), 1), 10)
+//   point2.value.x = e.clientX
+//   point2.value.y = e.clientY
 
-  console.log(e)
+//   let point = svgRef.value?.createSVGPoint()
+//   if (!point) {
+//     return
+//   }
 
-  point2.value.x = e.clientX
-  point2.value.y = e.clientY
+//   const matrix = svgRef.value?.getScreenCTM()
+//   if (!matrix) {
+//     return
+//   }
+//   console.log(svgRef.value?.getScreenCTM())
 
-  let point = svgRef.value?.createSVGPoint()
-  if (!point) {
-    return
-  }
+//   point.x = e.clientX - matrix?.e
+//   point.y = e.clientY - matrix?.f
+//   point = point.matrixTransform(svgRef.value.getCTM())
+//   console.log(point)
 
-  const matrix = svgRef.value?.getScreenCTM()
-  if (!matrix) {
-    return
-  }
-  console.log(svgRef.value?.getScreenCTM())
+//   point1.value = point
 
-  point.x = e.clientX - matrix?.e
-  point.y = e.clientY - matrix?.f
-  point = point.matrixTransform(svgRef.value.getCTM())
-  console.log(point)
+//   const deltaNew = {
+//     x: (point.x * (tempZoom.value / oldZoom)) - point.x,
+//     y: (point.y * (tempZoom.value / oldZoom)) - point.y
+//   }
 
-  point1.value = point
+//   currentPosition.value.x -= deltaNew.x
+//   currentPosition.value.y -= deltaNew.y
 
-  const deltaNew = {
-    x: (point.x * (tempZoom.value / oldZoom)) - point.x,
-    y: (point.y * (tempZoom.value / oldZoom)) - point.y
-  }
+//   emit('zoomchanged', tempZoom.value)
+// }
 
-  currentPosition.value.x -= deltaNew.x
-  currentPosition.value.y -= deltaNew.y
+// function wheelBetter (e: WheelEvent) {
+//   e.preventDefault()
+//   e.stopPropagation()
 
-  emit('zoomchanged', tempZoom.value)
-}
+//   const matrix = svgRef.value?.getScreenCTM()
+//   if (!matrix) {
+//     return
+//   }
+//   const svgPoint = svgRef.value.createSVGPoint()
+//   svgPoint.x = e.clientX
+//   svgPoint.y = e.clientY
+//   const svgCoords = svgPoint.matrixTransform(matrix.inverse())
+//   const oldZoom = tempZoom.value
+//   //   if (e.deltaY <= 0) {
+//   //     tempZoom.value += ZOOM_SPEED
+//   //   } else {
+//   //     tempZoom.value -= ZOOM_SPEED
+//   //   }
+//   //   tempZoom.value = Math.min(Math.max(tempZoom.value, 1), 10)
 
-function wheelBetter (e: WheelEvent) {
-  e.preventDefault()
-  e.stopPropagation()
+//   //   const point = {}
+//   //   point.x = e.clientX - matrix?.e
+//   //   point.y = e.clientY - matrix?.f
+//   //   point.x = matrix?.e
+//   //   point.y = matrix?.f
 
-  const matrix = svgRef.value?.getScreenCTM()
-  if (!matrix) {
-    return
-  }
-  const svgPoint = svgRef.value.createSVGPoint()
-  svgPoint.x = e.clientX
-  svgPoint.y = e.clientY
-  const svgCoords = svgPoint.matrixTransform(matrix.inverse())
-  const oldZoom = tempZoom.value
-  //   if (e.deltaY <= 0) {
-  //     tempZoom.value += ZOOM_SPEED
-  //   } else {
-  //     tempZoom.value -= ZOOM_SPEED
-  //   }
-  //   tempZoom.value = Math.min(Math.max(tempZoom.value, 1), 10)
+//   //   const deltaNew = {
+//   //     x: (point.x * (tempZoom.value / oldZoom)) - point.x,
+//   //     y: (point.y * (tempZoom.value / oldZoom)) - point.y
+//   //   }
 
-  //   const point = {}
-  //   point.x = e.clientX - matrix?.e
-  //   point.y = e.clientY - matrix?.f
-  //   point.x = matrix?.e
-  //   point.y = matrix?.f
+//   //   currentPosition.value.x -= deltaNew.x
+//   //   currentPosition.value.y -= deltaNew.y
 
-  //   const deltaNew = {
-  //     x: (point.x * (tempZoom.value / oldZoom)) - point.x,
-  //     y: (point.y * (tempZoom.value / oldZoom)) - point.y
-  //   }
+//   //   const deltaNew = svgRef.value.createSVGPoint()
+//   //   //   deltaNew.x = svgCoords.x
+//   //   //   deltaNew.y = svgCoords.y
+//   //   deltaNew.x = svgCoords.x - (svgCoords.x * (tempZoom.value / oldZoom))
+//   //   deltaNew.y = svgCoords.y - (svgCoords.y * (tempZoom.value / oldZoom))
+//   //   console.log({ x: deltaNew.x, y: deltaNew.y }, { x: svgCoords.x, ny: svgCoords.y })
 
-  //   currentPosition.value.x -= deltaNew.x
-  //   currentPosition.value.y -= deltaNew.y
+//   const svgPointAfterZoom = svgRef.value.createSVGPoint()
+//   svgPointAfterZoom.x = e.clientX
+//   svgPointAfterZoom.y = e.clientY
+//   const svgCoordsAfterZoom = svgPointAfterZoom.matrixTransform(matrix.inverse())
 
-  //   const deltaNew = svgRef.value.createSVGPoint()
-  //   //   deltaNew.x = svgCoords.x
-  //   //   deltaNew.y = svgCoords.y
-  //   deltaNew.x = svgCoords.x - (svgCoords.x * (tempZoom.value / oldZoom))
-  //   deltaNew.y = svgCoords.y - (svgCoords.y * (tempZoom.value / oldZoom))
-  //   console.log({ x: deltaNew.x, y: deltaNew.y }, { x: svgCoords.x, ny: svgCoords.y })
+//   const coordsBeforeZoom = svgPoint.matrixTransform(matrix)
 
-  const svgPointAfterZoom = svgRef.value.createSVGPoint()
-  svgPointAfterZoom.x = e.clientX
-  svgPointAfterZoom.y = e.clientY
-  const svgCoordsAfterZoom = svgPointAfterZoom.matrixTransform(matrix.inverse())
+//   console.log({ x: e.clientX, y: e.clientY }, { x: coordsBeforeZoom.x, ny: coordsBeforeZoom.y })
 
-  const coordsBeforeZoom = svgPoint.matrixTransform(matrix)
+//   //   const newScreenCoords = deltaNew.matrixTransform(matrix)
 
-  console.log({ x: e.clientX, y: e.clientY }, { x: coordsBeforeZoom.x, ny: coordsBeforeZoom.y })
+//   //   currentPosition.value.x = newScreenCoords.x
+//   //   currentPosition.value.y = newScreenCoords.y
 
-  //   const newScreenCoords = deltaNew.matrixTransform(matrix)
+//   currentPosition.value.x += e.clientX - coordsBeforeZoom.x
+//   currentPosition.value.y += e.clientY - coordsBeforeZoom.y
 
-  //   currentPosition.value.x = newScreenCoords.x
-  //   currentPosition.value.y = newScreenCoords.y
+//   const deltaNew = svgRef.value.createSVGPoint()
+//   deltaNew.x = svgPointAfterZoom.x - svgPoint.x
+//   deltaNew.y = svgPointAfterZoom.y - svgPoint.y
 
-  currentPosition.value.x += e.clientX - coordsBeforeZoom.x
-  currentPosition.value.y += e.clientY - coordsBeforeZoom.y
-
-  circleGreen.setAttribute('cx', svgPointAfterZoom.x)
-  circleGreen.setAttribute('cy', svgPointAfterZoom.y)
-
-  const deltaNew = svgRef.value.createSVGPoint()
-  deltaNew.x = svgPointAfterZoom.x - svgPoint.x
-  deltaNew.y = svgPointAfterZoom.y - svgPoint.y
-
-  console.log(deltaNew)
+//   console.log(deltaNew)
 
 //   currentPosition.value.x += point.x - startPosition.x
 //   currentPosition.value.y += point.y - startPosition.y
-}
-function wheelBetter1 (e: WheelEvent) {
-  e.preventDefault()
-  e.stopPropagation()
-  const oldZoom = tempZoom.value
-  if (e.deltaY <= 0) {
-    tempZoom.value += ZOOM_SPEED
-  } else {
-    tempZoom.value -= ZOOM_SPEED
-  }
-  tempZoom.value = Math.min(Math.max(tempZoom.value, 1), 10)
+// }
+// function wheelBetter1 (e: WheelEvent) {
+//   e.preventDefault()
+//   e.stopPropagation()
+//   const oldZoom = tempZoom.value
+//   if (e.deltaY <= 0) {
+//     tempZoom.value += ZOOM_SPEED
+//   } else {
+//     tempZoom.value -= ZOOM_SPEED
+//   }
+//   tempZoom.value = Math.min(Math.max(tempZoom.value, 1), 10)
 
-  const matrix = svgRef.value?.getScreenCTM()
-  if (!matrix) {
-    return
-  }
-  const point = {}
-  point.x = e.clientX - matrix?.e
-  point.y = e.clientY - matrix?.f
-  point.x = matrix?.e
-  point.y = matrix?.f
+//   const matrix = svgRef.value?.getScreenCTM()
+//   if (!matrix) {
+//     return
+//   }
+//   const point = {}
+//   point.x = e.clientX - matrix?.e
+//   point.y = e.clientY - matrix?.f
+//   point.x = matrix?.e
+//   point.y = matrix?.f
 
-  const deltaNew = {
-    x: (point.x * (tempZoom.value / oldZoom)) - point.x,
-    y: (point.y * (tempZoom.value / oldZoom)) - point.y
-  }
+//   const deltaNew = {
+//     x: (point.x * (tempZoom.value / oldZoom)) - point.x,
+//     y: (point.y * (tempZoom.value / oldZoom)) - point.y
+//   }
 
-  currentPosition.value.x -= deltaNew.x
-  currentPosition.value.y -= deltaNew.y
+//   currentPosition.value.x -= deltaNew.x
+//   currentPosition.value.y -= deltaNew.y
 
-//   currentPosition.value.x += point.x - startPosition.x
-//   currentPosition.value.y += point.y - startPosition.y
-}
+// //   currentPosition.value.x += point.x - startPosition.x
+// //   currentPosition.value.y += point.y - startPosition.y
+// }
 </script>
 
 <template>
@@ -406,8 +443,9 @@ function wheelBetter1 (e: WheelEvent) {
     :style="{transform: transformStyle}"
     @mousedown="mousedown"
     @mousemove="mousemove"
-    @wheel.prevent="wheelBetter"
+    @wheel.prevent="wheelChanged"
   >
+
     <template v-for="(item, index) in mapDataProvider.mapItems">
       <polygon
         v-if="!isSelected(item)"
@@ -463,6 +501,33 @@ function wheelBetter1 (e: WheelEvent) {
         @mouseout="mouseOut()"
       />
     </g>
+
+    <circle
+      r="45"
+      :cx="pointCircle1.x"
+      :cy="pointCircle1.y"
+      fill="yellow"
+    />
+
+    <text
+      :x="pointCircle1.x"
+      :y="pointCircle1.y"
+      text-anchor="middle"
+      stroke="#000"
+    >Scrren</text>
+
+    <circle
+      r="34"
+      :cx="pointCircle2.x"
+      :cy="pointCircle2.y"
+      fill="black"
+    />
+    <text
+      :x="pointCircle2.x"
+      :y="pointCircle2.y"
+      text-anchor="middle"
+      stroke="#fff"
+    >Correct</text>
 
   </svg>
   <!-- </div> -->
