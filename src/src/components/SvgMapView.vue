@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, nextTick, onMounted } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 
 import { mathHelper } from 'src/helpers/mathHelper'
 
@@ -24,7 +24,7 @@ const svgRef = ref<SVGSVGElement>()
 const isMouseDown = ref(false)
 const viewBox = ref('')
 
-const pointCircle2 = ref({ x: 0, y: 0 })
+const mousePosition = ref({ x: 0, y: 0 })
 
 const tempZoom = ref(props.zoom || 1)
 
@@ -38,7 +38,12 @@ const startPosition = ref({
 })
 
 onMounted(() => {
+  document.addEventListener('mouseup', mouseUp)
   calculateViewBox()
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('mouseup', mouseUp)
 })
 
 const minMaxValues = ref(getMinAndMaxValues(props.dataItems))
@@ -53,29 +58,13 @@ function getMinAndMaxValues (items: DataItem[] | undefined) {
     return { min: null, max: null }
   }
 
-  let min = +(items[0].value || 0)
-  let max = +(items[0].value || 0)
+  const values = items.filter(o => o.value).map(o => o.value ?? 0)
 
-  for (let i = 1; i < items.length; i++) {
-    if (items[i]) {
-      items[i].value = items[i].value || 0
-      if (items[i]?.value < min) {
-        min = +items[i].value || 0
-      }
-      if (items[i].value > max) {
-        max = +items[i].value || 0
-      }
-    }
-  }
-
-  min -= 10
-  max += 10
-  console.log(min, max)
+  const min = Math.min(...values) - 10
+  const max = Math.max(...values) + 10
 
   return { min, max }
 }
-
-// const
 
 function createPolygon (points: MapItemPoint[]) {
   if (!points.length) {
@@ -194,78 +183,95 @@ const transformStyle = computed(() => {
   return `scale(${tempZoom.value})`
 })
 
-function mousedown (e: MouseEvent) {
+function mouseDown (e: MouseEvent) {
   isMouseDown.value = true
 
   const svgPosition = convertScreenPosition(e.clientX, e.clientY)
-
   startPosition.value.x = svgPosition.x
   startPosition.value.y = svgPosition.y
 }
 
-function convertScreenPosition (x: number, y: number) {
-  const matrix = svgRef.value?.getScreenCTM()
-  if (!matrix) {
-    return { x: 0, y: 0 }
-  }
-
-  const svgPoint1 = svgRef.value?.createSVGPoint()
-  if (svgPoint1) {
-    svgPoint1.x = x
-    svgPoint1.y = y
-    const svgCoords = svgPoint1.matrixTransform(matrix.inverse())
-
-    const x1 = svgCoords.x / tempZoom.value
-    const y1 = svgCoords.y / tempZoom.value
-
-    return { x: x1, y: y1 }
-  }
-
-  return { x: 0, y: 0 }
+function mouseUp () {
+  isMouseDown.value = false
 }
 
-function setCirclePositions (x: number, y: number) {
-  const position = convertScreenPosition(x, y)
+function mouseMove (e: MouseEvent) {
+  setMousePosition(e.clientX, e.clientY)
 
-  pointCircle2.value.x = position.x
-  pointCircle2.value.y = position.y
-}
-
-function mousemove (e: MouseEvent) {
-  setCirclePositions(e.clientX, e.clientY)
-
-  if (isMouseDown.value) {
-    currentPosition.value.x += pointCircle2.value.x - startPosition.value.x
-    currentPosition.value.y += pointCircle2.value.y - startPosition.value.y
-    calculateViewBox()
+  if (!isMouseDown.value) {
+    return
   }
-}
 
-function wheelChanged (e: WheelEvent) {
-  setCirclePositions(e.clientX, e.clientY)
+  const differenceX = mousePosition.value.x - startPosition.value.x
+  const differenceY = mousePosition.value.y - startPosition.value.y
 
-  tempZoom.value += (e.deltaY / 1000) * -1
-  const testX = pointCircle2.value.x
-  const testY = pointCircle2.value.y
+  const smoothingFactor = 10
+  currentPosition.value.x += mathHelper.roundTo(differenceX / smoothingFactor, 4)
+  currentPosition.value.y += mathHelper.roundTo(differenceY / smoothingFactor, 4)
+
+  calculateViewBox()
 
   nextTick(() => {
-    setCirclePositions(e.clientX, e.clientY)
-
-    const diffX = (testX - pointCircle2.value.x) * tempZoom.value
-    const diffY = (testY - pointCircle2.value.y) * tempZoom.value
-
-    currentPosition.value.x -= diffX
-    currentPosition.value.y -= diffY
-
-    nextTick(() => {
-      setCirclePositions(e.clientX, e.clientY)
-    })
+    setMousePosition(e.clientX, e.clientY)
   })
 }
 
-document.addEventListener('mouseup', () => {
-  isMouseDown.value = false
-})
+function wheelChanged (e: WheelEvent) {
+  setMousePosition(e.clientX, e.clientY)
+
+  const currentMousePositionX = mousePosition.value.x
+  const currentMousePositionY = mousePosition.value.y
+
+  // set the scaling factor (and make sure it's at least 10%)
+  let scale = tempZoom.value + (e.deltaY / 1000)
+  scale = Math.abs(scale) < 0.1 ? 0.1 : scale
+
+  tempZoom.value = scale // (e.deltaY / 1000) * -1
+
+  setMousePosition(e.clientX, e.clientY)
+
+  const diffX = (currentMousePositionX - mousePosition.value.x) * tempZoom.value
+  const diffY = (currentMousePositionY - mousePosition.value.y) * tempZoom.value
+
+  currentPosition.value.x -= diffX
+  currentPosition.value.y -= diffY
+
+  calculateViewBox()
+
+  nextTick(() => {
+    setMousePosition(e.clientX, e.clientY)
+  })
+}
+
+function convertScreenPosition (screenX: number, screenY: number) {
+  const svgMatrix = svgRef.value?.getScreenCTM()?.inverse()
+  if (!svgMatrix) {
+    console.log('failure')
+    return { x: 0, y: 0 }
+  }
+
+  const svgPoint = svgRef.value?.createSVGPoint()
+  if (!svgPoint) {
+    console.log('failure')
+    return { x: 0, y: 0 }
+  }
+
+  svgPoint.x = screenX
+  svgPoint.y = screenY
+  const svgCoords = svgPoint.matrixTransform(svgMatrix)
+
+  const x1 = mathHelper.roundTo(svgCoords.x / tempZoom.value, 3)
+  const y1 = mathHelper.roundTo(svgCoords.y / tempZoom.value, 3)
+
+  return { x: x1, y: y1 }
+}
+
+function setMousePosition (x: number, y: number) {
+  const position = convertScreenPosition(x, y)
+
+  mousePosition.value.x = position.x
+  mousePosition.value.y = position.y
+}
 
 function valueToHexColor (value: number, min: number, max: number) {
   const scaleValue = scaleConversion(value, min, max)
@@ -315,8 +321,8 @@ function scaleConversion (value: number, min: number, max: number): number {
     height="100%"
     preserveAspectRatio="xMinYMin meet"
 
-    @mousedown="mousedown"
-    @mousemove="mousemove"
+    @mousedown="mouseDown"
+    @mousemove="mouseMove"
     @wheel.prevent="wheelChanged"
   >
     <g :transform="transformStyle">
@@ -378,8 +384,8 @@ function scaleConversion (value: number, min: number, max: number): number {
 
       <circle
         :r="5"
-        :cx="pointCircle2.x"
-        :cy="pointCircle2.y"
+        :cx="mousePosition.x"
+        :cy="mousePosition.y"
         fill="black"
       />
     </g>
@@ -395,7 +401,7 @@ function scaleConversion (value: number, min: number, max: number): number {
     </div>
     <div class="col-3">
       Mouse Position<br>
-      {{ pointCircle2.x }} / {{ pointCircle2.y }}
+      {{ mousePosition.x }} / {{ mousePosition.y }}
     </div>
     <div class="col-2">
       ViewBox<br>{{ viewBox }}
