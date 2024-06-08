@@ -10,7 +10,7 @@ import SelectionGrid from 'components/SelectionGrid.vue'
 import { DataItem } from 'src/models/DataItem'
 
 const splitterModel = ref(20)
-const tab = ref('vorarlberg')
+const tab = ref('austria')
 
 const dataItems = ref<DataItem[]>([
   {
@@ -46,14 +46,14 @@ function newItemAdded (item: DataItem) {
           class="text-grey-8"
         >
           <q-tab
-            name="vorarlberg"
-            icon="map"
-            label="Vorarlberg"
-          />
-          <q-tab
             name="austria"
             icon="map"
             label="Austria"
+          />
+          <q-tab
+            name="vorarlberg"
+            icon="map"
+            label="Vorarlberg"
           />
           <q-tab
             name="test"
