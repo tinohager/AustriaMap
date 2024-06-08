@@ -43,22 +43,23 @@ watch(() => props.dataItems, (newDataItems) => {
 }, { deep: true })
 
 // Function to get the min and max values
-function getMinAndMaxValues (items: DataItem[]) {
-  if (!Array.isArray(items) || items.length === 0) {
+function getMinAndMaxValues (items: DataItem[] | undefined) {
+  if (!Array.isArray(items) || items.length === 0 || !items[0]) {
     return { min: null, max: null }
   }
 
-  let min = +items[0].value
-  let max = +items[0].value
+  let min = +(items[0].value || 0)
+  let max = +(items[0].value || 0)
 
   for (let i = 1; i < items.length; i++) {
-    console.log(items[i].value, { min, max })
-    // items[i].value = items[i].value || 0
-    if (items[i].value < min) {
-      min = +items[i].value
-    }
-    if (items[i].value > max) {
-      max = +items[i].value
+    if (items[i]) {
+      items[i].value = items[i].value || 0
+      if (items[i]?.value < min) {
+        min = +items[i].value || 0
+      }
+      if (items[i].value > max) {
+        max = +items[i].value || 0
+      }
     }
   }
 
@@ -132,8 +133,8 @@ function getFillColor (item: MapItem) {
 
   //   console.log('FILL', item.name)
   const dataItem = props.dataItems?.find(o => o.key === item.name)
-  if (dataItem) {
-    return valueToHexColor(dataItem.value, minMaxValues.value)
+  if (dataItem?.value && minMaxValues?.value?.min) {
+    return valueToHexColor(dataItem.value, minMaxValues.value.min, minMaxValues.value.max)
   }
 
   // if (item.active) {
@@ -237,7 +238,7 @@ function mousemove (e: MouseEvent) {
 function wheelChanged (e: WheelEvent) {
   setCirclePositions(e.clientX, e.clientY)
 
-  tempZoom.value += (e.deltaY / 1000)
+  tempZoom.value += (e.deltaY / 1000) * -1
   const testX = pointCircle2.value.x
   const testY = pointCircle2.value.y
 
@@ -260,34 +261,38 @@ document.addEventListener('mouseup', () => {
   isMouseDown.value = false
 })
 
-function valueToHexColor (value, minMax) {
-  const { min, max } = minMax
-  // Ensure value is within the range of min and max
-  const valueN = Math.min(Math.max(value, min), max)
+function valueToHexColor (value: number, min: number, max: number) {
+  const scaleValue = scaleConversion(value, min, max)
+  return percentToHex(100 - scaleValue)
+}
 
-  // Normalize the value within the range
-  const normalizedValue = (valueN - min) / (max - min)
+function componentToHex (c : number) {
+  const hex = c.toString(16)
+  return hex.length === 1 ? '0' + hex : hex
+}
 
-  let red, green, blue
-
-  if (normalizedValue < 0.5) {
-    // Interpolate from red to yellow
-    red = 255
-    green = Math.round(255 * (normalizedValue * 2))
-    blue = 0
-  } else {
-    // Interpolate from yellow to green
-    red = Math.round(255 * (2 - normalizedValue * 2))
-    green = 255
-    blue = 0
+function percentToHex (percent : number) {
+  if (percent === 100) {
+    percent = 99
   }
 
-  // Convert the RGB values to a hex string
-  const toHex = (component) => component.toString(16).padStart(2, '0')
-  const hexColor = `#${toHex(red)}${toHex(green)}${toHex(blue)}`
+  let r, g
 
-  return hexColor
+  if (percent < 50) {
+    // green to yellow
+    r = Math.floor(255 * (percent / 50))
+    g = 255
+  } else {
+    // yellow to red
+    r = 255
+    g = Math.floor(255 * ((50 - percent % 50) / 50))
+  }
+  return `#${componentToHex(r)}${componentToHex(g)}00`
 }
+function scaleConversion (value: number, min: number, max: number): number {
+  return ((value - min) / (max - min)) * 100
+}
+
 </script>
 
 <template>

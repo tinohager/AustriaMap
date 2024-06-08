@@ -12,15 +12,14 @@ import { DataItem } from 'src/models/DataItem'
 const splitterModel = ref(20)
 const tab = ref('vorarlberg')
 
-const dataItems: DataItem[] = ref([
+const dataItems = ref<DataItem[]>([
   {
     key: 'Kennelbach',
-    value: 1,
-    active: true
+    value: 1
   },
   {
     key: 'Dornbirn',
-    value: 5
+    value: 30
   },
 
   {
@@ -28,6 +27,10 @@ const dataItems: DataItem[] = ref([
     value: 60
   }
 ])
+
+function newItemAdded (item: DataItem) {
+  dataItems.value.push(item)
+}
 
 </script>
 
@@ -58,7 +61,10 @@ const dataItems: DataItem[] = ref([
             label="Test"
           />
         </q-tabs>
-        <SelectionGrid :data-items="dataItems" />
+        <SelectionGrid
+          :data-items="dataItems"
+          @new-item-added="newItemAdded"
+        />
       </template>
 
       <template #after>
