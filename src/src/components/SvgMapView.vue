@@ -219,20 +219,10 @@ function convertScreenPosition (x: number, y: number) {
 }
 
 function setCirclePositions (x: number, y: number) {
-  const matrix = svgRef.value?.getScreenCTM()
-  if (!matrix) {
-    return
-  }
+  const position = convertScreenPosition(x, y)
 
-  const svgPoint1 = svgRef.value?.createSVGPoint()
-  if (svgPoint1) {
-    svgPoint1.x = x
-    svgPoint1.y = y
-    const svgCoords = svgPoint1.matrixTransform(matrix.inverse())
-
-    pointCircle2.value.x = svgCoords.x / tempZoom.value
-    pointCircle2.value.y = svgCoords.y / tempZoom.value
-  }
+  pointCircle2.value.x = position.x
+  pointCircle2.value.y = position.y
 }
 
 function mousemove (e: MouseEvent) {
@@ -247,12 +237,22 @@ function mousemove (e: MouseEvent) {
 function wheelChanged (e: WheelEvent) {
   setCirclePositions(e.clientX, e.clientY)
 
-  console.log(e)
-
   tempZoom.value += (e.deltaY / 1000)
+  const testX = pointCircle2.value.x
+  const testY = pointCircle2.value.y
 
   nextTick(() => {
     setCirclePositions(e.clientX, e.clientY)
+
+    const diffX = (testX - pointCircle2.value.x) * tempZoom.value
+    const diffY = (testY - pointCircle2.value.y) * tempZoom.value
+
+    currentPosition.value.x -= diffX
+    currentPosition.value.y -= diffY
+
+    nextTick(() => {
+      setCirclePositions(e.clientX, e.clientY)
+    })
   })
 }
 
