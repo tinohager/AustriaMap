@@ -1,15 +1,5 @@
 import { MapItem } from 'src/models/MapItem'
-
-function roundTo (n : number, digits : number) {
-  if (digits === undefined) {
-    digits = 0
-  }
-
-  const multiplicator = Math.pow(10, digits)
-  n = parseFloat((n * multiplicator).toFixed(11))
-  const test = (Math.round(n) / multiplicator)
-  return +(test.toFixed(digits))
-}
+import { mathHelper } from './mathHelper'
 
 export function optimizeMapStructure (mapItems : MapItem[]) {
   const multiplier = 1.6
@@ -20,7 +10,7 @@ export function optimizeMapStructure (mapItems : MapItem[]) {
     name: o
       .name,
     points: o
-      .points.map(p => ({ x: roundTo((p.x + shiftX) * multiplier, 2), y: roundTo((p.y + shiftY) * multiplier, 2) }))
+      .points.map(p => ({ x: mathHelper.roundTo((p.x + shiftX) * multiplier, 2), y: mathHelper.roundTo((p.y + shiftY) * multiplier, 2) }))
   }))
 }
 

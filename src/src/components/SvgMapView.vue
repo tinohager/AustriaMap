@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 
+import { mathHelper } from 'src/helpers/mathHelper'
+
 import { MapItem, MapItemPoint } from 'src/models/MapItem'
 import { MapDataProvider } from 'src/models/MapDataProvider'
 
@@ -114,12 +116,14 @@ function calculateViewBox () {
   const yMin = Math.min(...props.mapDataProvider.mapItems.map(mapItem => Math.min(...mapItem.points.map(point => point.y))))
   const yMax = Math.max(...props.mapDataProvider.mapItems.map(mapItem => Math.max(...mapItem.points.map(point => point.y))))
 
-  const width = xMax - xMin
-  const height = yMax - yMin
-
   const padding = 0
 
-  return `${xMin - padding - currentPosition.value.x} ${yMin - padding - currentPosition.value.y} ${width + padding} ${height + padding}`
+  const width = xMax - xMin + padding
+  const height = yMax - yMin + padding
+  const x = mathHelper.roundTo(xMin - padding - currentPosition.value.x, 3)
+  const y = mathHelper.roundTo(yMin - padding - currentPosition.value.y, 3)
+
+  return `${x} ${y} ${width} ${height}`
 }
 
 const mousePosition = ref({
