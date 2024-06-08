@@ -117,11 +117,12 @@ function calculateViewBox () {
   const yMax = Math.max(...props.mapDataProvider.mapItems.map(mapItem => Math.max(...mapItem.points.map(point => point.y))))
 
   const padding = 0
+  const precision = 3
 
-  const width = mathHelper.roundTo(xMax - xMin + padding, 3)
-  const height = mathHelper.roundTo(yMax - yMin + padding, 3)
-  const x = mathHelper.roundTo(xMin - padding - currentPosition.value.x, 3)
-  const y = mathHelper.roundTo(yMin - padding - currentPosition.value.y, 3)
+  const width = mathHelper.roundTo(xMax - xMin + padding, precision)
+  const height = mathHelper.roundTo(yMax - yMin + padding, precision)
+  const x = mathHelper.roundTo(xMin - padding - currentPosition.value.x, precision)
+  const y = mathHelper.roundTo(yMin - padding - currentPosition.value.y, precision)
 
   return `${x} ${y} ${width} ${height}`
 }
