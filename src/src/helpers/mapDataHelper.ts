@@ -24,26 +24,23 @@ export function optimizeMapStructure (mapItems : MapItem[]) {
   }))
 }
 
-export function drawRasterMap () {
+export function drawRasterMap (rasterCountHorizont = 20, rasterCountVertical = 20, squareSize = 100) {
   const mapItems: MapItem[] = []
 
-  const rasterSize = 20
-  const rectangleSize = 100
-
-  for (let x = 0; x < rasterSize; x++) {
-    for (let y = 0; y < rasterSize; y++) {
-      const calculatedX = rectangleSize * x
-      const calculatedY = rectangleSize * y
+  for (let x = 0; x < rasterCountHorizont; x++) {
+    for (let y = 0; y < rasterCountVertical; y++) {
+      const calculatedX = squareSize * x
+      const calculatedY = squareSize * y
 
       const x1 = calculatedX
-      const x2 = calculatedX + rectangleSize
-      const x3 = calculatedX + rectangleSize
+      const x2 = calculatedX + squareSize
+      const x3 = calculatedX + squareSize
       const x4 = calculatedX
 
       const y1 = calculatedY
       const y2 = calculatedY
-      const y3 = calculatedY + rectangleSize
-      const y4 = calculatedY + rectangleSize
+      const y3 = calculatedY + squareSize
+      const y4 = calculatedY + squareSize
 
       mapItems.push({
 
