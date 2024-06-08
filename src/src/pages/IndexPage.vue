@@ -8,17 +8,9 @@ import { dataProvider as testDataProvider } from '../dataProviders/testDataProvi
 import SvgMapView from 'components/SvgMapView.vue'
 import SelectionGrid from 'components/SelectionGrid.vue'
 import { DataItem } from 'src/models/DataItem'
-// import VorarlbergMapView from 'components/VorarlbergMapView.vue'
-
-// const selectedCity = ref('')
-
-// function cityChanged (name : string) {
-//   selectedCity.value = name
-// }
 
 const splitterModel = ref(20)
 const tab = ref('vorarlberg')
-const zoom = ref(1)
 
 const dataItems: DataItem[] = ref([
   {
@@ -73,22 +65,27 @@ const dataItems: DataItem[] = ref([
         <q-tab-panels
           v-model="tab"
           vertical
-          class="bg-light-blue"
         >
           <q-tab-panel name="vorarlberg">
             <SvgMapView
               :map-data-provider="vorarlbergDataProvider"
-              :zoom="zoom"
+              :zoom="0.8"
               :data-items="dataItems"
             />
           </q-tab-panel>
 
           <q-tab-panel name="austria">
-            <SvgMapView :map-data-provider="austriaDataProvider" />
+            <SvgMapView
+              :map-data-provider="austriaDataProvider"
+              :zoom="0.7"
+            />
           </q-tab-panel>
 
           <q-tab-panel name="test">
-            <SvgMapView :map-data-provider="testDataProvider" />
+            <SvgMapView
+              :map-data-provider="testDataProvider"
+              :zoom="0.7"
+            />
           </q-tab-panel>
         </q-tab-panels>
       </template>

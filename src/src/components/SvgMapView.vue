@@ -291,32 +291,12 @@ function valueToHexColor (value, minMax) {
 </script>
 
 <template>
-  {{ minMaxValues }}
-  <div
-    class="row"
-    style="height: 50px;"
-  >
-    <div class="col-3">
-      CurrentPosition<br>{{ currentPosition.x }} / {{ currentPosition.y }}
-    </div>
-    <div class="col-3">
-      Mouse Position<br>
-      {{ pointCircle2.x }} / {{ pointCircle2.y }}
-    </div>
-    <div class="col-2">
-      ViewBox<br>{{ calculateViewBox() }}
-    </div>
-    <div class="col-2">
-      Zoom<br>{{ tempZoom }}
-    </div>
-  </div>
-
   <svg
     ref="svgRef"
     version="1.0"
     xmlns="http://www.w3.org/2000/svg"
     :viewBox="calculateViewBox()"
-    style="background-color: brown; border:2px solid #ddd;"
+    style="background-color: grey; border:2px solid #ddd;"
 
     width="100%"
     height="100%"
@@ -384,20 +364,33 @@ function valueToHexColor (value, minMax) {
       </g>
 
       <circle
-        :r="34"
+        :r="5"
         :cx="pointCircle2.x"
         :cy="pointCircle2.y"
         fill="black"
       />
-      <text
-        :x="pointCircle2.x"
-        :y="pointCircle2.y"
-        text-anchor="middle"
-        stroke="#fff"
-      >Correct</text>
     </g>
 
   </svg>
+
+  <div
+    class="row"
+    style="height: 50px;"
+  >
+    <div class="col-3">
+      CurrentPosition<br>{{ currentPosition.x }} / {{ currentPosition.y }}
+    </div>
+    <div class="col-3">
+      Mouse Position<br>
+      {{ pointCircle2.x }} / {{ pointCircle2.y }}
+    </div>
+    <div class="col-2">
+      ViewBox<br>{{ calculateViewBox() }}
+    </div>
+    <div class="col-2">
+      Zoom<br>{{ tempZoom }}
+    </div>
+  </div>
 </template>
 
 <style scoped>
