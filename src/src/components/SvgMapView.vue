@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 
 import { mathHelper } from 'src/helpers/mathHelper'
 
@@ -264,6 +264,12 @@ function mousemove (e: MouseEvent) {
 
 function wheelChanged (e: WheelEvent) {
   setCirclePosition(e.clientX, e.clientY)
+
+  tempZoom.value += 0.1
+
+  nextTick(() => {
+    setCirclePosition(e.clientX, e.clientY)
+  })
 }
 
 document.addEventListener('mouseup', () => {
