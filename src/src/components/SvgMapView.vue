@@ -1,16 +1,19 @@
 <script setup lang="ts">
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 
 import { mathHelper } from 'src/helpers/mathHelper'
 
 import { MapItem, MapItemPoint } from 'src/models/MapItem'
 import { MapDataProvider } from 'src/models/MapDataProvider'
+import { DataItem } from 'src/models/DataItem'
 
 const emit = defineEmits(['selectionchanged', 'zoomchanged'])
 
 export interface Props {
   mapDataProvider: MapDataProvider
   zoom?: number
+  heatmapData?: Map<string, number>
+  dataItems?: DataItem[]
 }
 
 const props = defineProps<Props>()
@@ -32,6 +35,41 @@ const startPosition = ref({
   x: 0,
   y: 0
 })
+
+const minMaxValues = ref(getMinAndMaxValues(props.dataItems))
+// Watch for changes in dataItems and update minMaxValues
+watch(() => props.dataItems, (newDataItems) => {
+  minMaxValues.value = getMinAndMaxValues(newDataItems)
+}, { deep: true })
+
+// Function to get the min and max values
+function getMinAndMaxValues (items: DataItem[]) {
+  if (!Array.isArray(items) || items.length === 0) {
+    return { min: null, max: null }
+  }
+
+  let min = +items[0].value
+  let max = +items[0].value
+
+  for (let i = 1; i < items.length; i++) {
+    console.log(items[i].value, { min, max })
+    // items[i].value = items[i].value || 0
+    if (items[i].value < min) {
+      min = +items[i].value
+    }
+    if (items[i].value > max) {
+      max = +items[i].value
+    }
+  }
+
+  min -= 10
+  max += 10
+  console.log(min, max)
+
+  return { min, max }
+}
+
+// const
 
 function createPolygon (points: MapItemPoint[]) {
   if (!points.length) {
@@ -90,6 +128,12 @@ function getFillColor (item: MapItem) {
 
   if (isHover(item)) {
     return '#dddddd'
+  }
+
+  //   console.log('FILL', item.name)
+  const dataItem = props.dataItems?.find(o => o.key === item.name)
+  if (dataItem) {
+    return valueToHexColor(dataItem.value, minMaxValues.value)
   }
 
   // if (item.active) {
@@ -216,9 +260,38 @@ document.addEventListener('mouseup', () => {
   isMouseDown.value = false
 })
 
+function valueToHexColor (value, minMax) {
+  const { min, max } = minMax
+  // Ensure value is within the range of min and max
+  const valueN = Math.min(Math.max(value, min), max)
+
+  // Normalize the value within the range
+  const normalizedValue = (valueN - min) / (max - min)
+
+  let red, green, blue
+
+  if (normalizedValue < 0.5) {
+    // Interpolate from red to yellow
+    red = 255
+    green = Math.round(255 * (normalizedValue * 2))
+    blue = 0
+  } else {
+    // Interpolate from yellow to green
+    red = Math.round(255 * (2 - normalizedValue * 2))
+    green = 255
+    blue = 0
+  }
+
+  // Convert the RGB values to a hex string
+  const toHex = (component) => component.toString(16).padStart(2, '0')
+  const hexColor = `#${toHex(red)}${toHex(green)}${toHex(blue)}`
+
+  return hexColor
+}
 </script>
 
 <template>
+  {{ minMaxValues }}
   <div
     class="row"
     style="height: 50px;"

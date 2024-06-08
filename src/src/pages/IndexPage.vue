@@ -6,6 +6,8 @@ import { dataProvider as vorarlbergDataProvider } from '../dataProviders/vorarlb
 import { dataProvider as testDataProvider } from '../dataProviders/testDataProvider'
 
 import SvgMapView from 'components/SvgMapView.vue'
+import SelectionGrid from 'components/SelectionGrid.vue'
+import { DataItem } from 'src/models/DataItem'
 // import VorarlbergMapView from 'components/VorarlbergMapView.vue'
 
 // const selectedCity = ref('')
@@ -17,6 +19,24 @@ import SvgMapView from 'components/SvgMapView.vue'
 const splitterModel = ref(20)
 const tab = ref('vorarlberg')
 const zoom = ref(1)
+
+const dataItems: DataItem[] = ref([
+  {
+    key: 'Kennelbach',
+    value: 1,
+    active: true
+  },
+  {
+    key: 'Dornbirn',
+    value: 5
+  },
+
+  {
+    key: 'Bregenz',
+    value: 60
+  }
+])
+
 </script>
 
 <template>
@@ -46,6 +66,7 @@ const zoom = ref(1)
             label="Test"
           />
         </q-tabs>
+        <SelectionGrid :data-items="dataItems" />
       </template>
 
       <template #after>
@@ -58,6 +79,7 @@ const zoom = ref(1)
             <SvgMapView
               :map-data-provider="vorarlbergDataProvider"
               :zoom="zoom"
+              :data-items="dataItems"
             />
           </q-tab-panel>
 
