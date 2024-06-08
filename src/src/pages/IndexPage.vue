@@ -84,6 +84,7 @@ function newItemAdded (item: DataItem) {
             <SvgMapView
               :map-data-provider="austriaDataProvider"
               :zoom="0.7"
+              :data-items="dataItems"
             />
           </q-tab-panel>
 
