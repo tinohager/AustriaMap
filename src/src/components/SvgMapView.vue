@@ -224,19 +224,17 @@ document.addEventListener('mouseup', () => {
     style="height: 50px;"
   >
     <div class="col-3">
-      CP:{{ currentPosition.x }} / {{ currentPosition.y }}
+      CurrentPosition<br>{{ currentPosition.x }} / {{ currentPosition.y }}
     </div>
     <div class="col-3">
-      SP:{{ pointCircle2.x }} / {{ pointCircle2.y }}
+      Mouse Position<br>
+      {{ pointCircle2.x }} / {{ pointCircle2.y }}
     </div>
     <div class="col-2">
-      VB:{{ calculateViewBox() }}
+      ViewBox<br>{{ calculateViewBox() }}
     </div>
     <div class="col-2">
-      Zoom: {{ props.zoom }} | {{ tempZoom }}
-    </div>
-    <div class="col-2">
-      {{ transformStyle }}
+      Zoom<br>{{ tempZoom }}
     </div>
   </div>
 
