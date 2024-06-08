@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, onMounted } from 'vue'
 
 import { mathHelper } from 'src/helpers/mathHelper'
 
@@ -22,6 +22,7 @@ const selected = ref<string | undefined>(undefined)
 const hover = ref<string | undefined>(undefined)
 const svgRef = ref<SVGSVGElement>()
 const isMouseDown = ref(false)
+const viewBox = ref('')
 
 const pointCircle2 = ref({ x: 0, y: 0 })
 
@@ -34,6 +35,10 @@ const currentPosition = ref({
 const startPosition = ref({
   x: 0,
   y: 0
+})
+
+onMounted(() => {
+  calculateViewBox()
 })
 
 const minMaxValues = ref(getMinAndMaxValues(props.dataItems))
@@ -182,7 +187,7 @@ function calculateViewBox () {
   const x = mathHelper.roundTo(xMin - padding - currentPosition.value.x, precision)
   const y = mathHelper.roundTo(yMin - padding - currentPosition.value.y, precision)
 
-  return `${x} ${y} ${width} ${height}`
+  viewBox.value = `${x} ${y} ${width} ${height}`
 }
 
 const transformStyle = computed(() => {
@@ -232,6 +237,7 @@ function mousemove (e: MouseEvent) {
   if (isMouseDown.value) {
     currentPosition.value.x += pointCircle2.value.x - startPosition.value.x
     currentPosition.value.y += pointCircle2.value.y - startPosition.value.y
+    calculateViewBox()
   }
 }
 
@@ -297,10 +303,12 @@ function scaleConversion (value: number, min: number, max: number): number {
 
 <template>
   <svg
+    v-if="viewBox"
+
     ref="svgRef"
     version="1.0"
     xmlns="http://www.w3.org/2000/svg"
-    :viewBox="calculateViewBox()"
+    :viewBox="viewBox"
     style="background-color: grey; border:2px solid #ddd;"
 
     width="100%"
@@ -390,7 +398,7 @@ function scaleConversion (value: number, min: number, max: number): number {
       {{ pointCircle2.x }} / {{ pointCircle2.y }}
     </div>
     <div class="col-2">
-      ViewBox<br>{{ calculateViewBox() }}
+      ViewBox<br>{{ viewBox }}
     </div>
     <div class="col-2">
       Zoom<br>{{ tempZoom }}
