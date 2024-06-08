@@ -118,8 +118,8 @@ function calculateViewBox () {
 
   const padding = 0
 
-  const width = xMax - xMin + padding
-  const height = yMax - yMin + padding
+  const width = mathHelper.roundTo(xMax - xMin + padding, 3)
+  const height = mathHelper.roundTo(yMax - yMin + padding, 3)
   const x = mathHelper.roundTo(xMin - padding - currentPosition.value.x, 3)
   const y = mathHelper.roundTo(yMin - padding - currentPosition.value.y, 3)
 
