@@ -104,6 +104,7 @@ function onClick () {
     </q-list>
     <q-btn
       color="grey-8"
+      unelevated
       label="Hinzufügen"
       icon-right="add"
       class="q-mt-sm full-width"

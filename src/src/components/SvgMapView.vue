@@ -18,12 +18,14 @@ export interface Props {
 
 const props = defineProps<Props>()
 
-const selected = ref<string | undefined>(undefined)
-const hover = ref<string | undefined>(undefined)
 const svgRef = ref<SVGSVGElement>()
 
 const isMouseDown = ref(false)
 const viewBox = ref('')
+const isMapDownload = ref(false)
+
+const selected = ref<string | undefined>(undefined)
+const hover = ref<string | undefined>(undefined)
 
 const tempZoom = ref(props.zoom || 1)
 
@@ -248,6 +250,75 @@ function resetZoom () {
   calculateViewBox()
 }
 
+async function download () {
+  isMapDownload.value = true
+
+  resetZoom()
+  await nextTick(async () => {
+    await prepareImage()
+    isMapDownload.value = false
+  })
+
+  return true
+}
+
+async function prepareImage () {
+  if (!svgRef.value) {
+    return
+  }
+
+  const imageScale = 5
+
+  const width = svgRef.value.width.baseVal.value * imageScale
+  const height = svgRef.value.height.baseVal.value * imageScale
+
+  const serializer = new XMLSerializer()
+  const svgString = serializer.serializeToString(svgRef.value)
+
+  const svgBlob = new Blob([svgString], {
+    type: 'image/svg+xml;charset=utf-8'
+  })
+
+  const DOMURL = window.URL || window.webkitURL || window
+  const url = DOMURL.createObjectURL(svgBlob)
+
+  const image = new Image()
+  image.width = width
+  image.height = height
+  image.src = url
+
+  await new Promise((resolve) => {
+    image.onload = resolve
+  })
+
+  const canvas = document.createElement('canvas')
+  canvas.width = image.width
+  canvas.height = image.height
+
+  const ctx = canvas.getContext('2d')
+  if (!ctx) {
+    return
+  }
+
+  ctx.drawImage(image, 0, 0)
+  DOMURL.revokeObjectURL(url)
+
+  const imgURI = canvas
+    .toDataURL('image/png')
+    .replace('image/png', 'image/octet-stream')
+
+  triggerDownload(imgURI)
+}
+
+function triggerDownload (imgURI : string) {
+  const a = document.createElement('a')
+  a.download = 'MapImage.png' // filename
+  a.target = '_blank'
+  a.href = imgURI
+
+  a.click()
+}
+
 function convertScreenPosition (screenX: number, screenY: number) {
   const svgMatrix = svgRef.value?.getScreenCTM()?.inverse()
   if (!svgMatrix) {
@@ -313,115 +384,124 @@ function scaleConversion (value: number, min: number, max: number): number {
 </script>
 
 <template>
-  <svg
-    v-if="viewBox"
+  <div class="bg-grey-1">
+    <svg
+      v-if="viewBox"
+      ref="svgRef"
+      version="1.0"
+      xmlns="http://www.w3.org/2000/svg"
+      :viewBox="viewBox"
+      style="width: 100%; height: 80vh;"
 
-    ref="svgRef"
-    version="1.0"
-    xmlns="http://www.w3.org/2000/svg"
-    :viewBox="viewBox"
-    style="background-color: grey; border:2px solid #ddd;"
+      @mousedown="mouseDown"
+      @mousemove="mouseMove"
+      @wheel.prevent="wheelChanged"
+    >
+      <g :transform="transformStyle">
+        <template v-for="(item, index) in mapDataProvider.mapItems">
+          <polygon
+            v-if="!isSelected(item)"
+            :key="`polygon${index}`"
+            :points="createPolygon(item.points)"
+            vector-effect="non-scaling-stroke"
+            :stroke-width="`0.1vw`"
+            :stroke="getStrokeColor(item)"
+            :fill="getFillColor(item)"
+          />
+          <polygon
+            v-else
+            :key="`polygon-selected${index}`"
+            :points="createPolygon(item.points)"
+            :stroke-width="`0.5px`"
+            :stroke="getStrokeColor(item)"
+            :fill="getFillColor(item)"
+          />
+        </template>
 
-    width="100%"
-    height="80vh"
-    preserveAspectRatio="xMinYMin meet"
-
-    @mousedown="mouseDown"
-    @mousemove="mouseMove"
-    @wheel.prevent="wheelChanged"
-  >
-    <g :transform="transformStyle">
-      <template v-for="(item, index) in mapDataProvider.mapItems">
-        <polygon
-          v-if="!isSelected(item)"
-          :key="`polygon${index}`"
-          :points="createPolygon(item.points)"
-          vector-effect="non-scaling-stroke"
-          :stroke-width="`0.1vw`"
-          :stroke="getStrokeColor(item)"
-          :fill="getFillColor(item)"
+        <circle
+          :r="5"
+          :cx="mousePosition.x"
+          :cy="mousePosition.y"
+          :fill="isMapDownload ? 'transparent' : 'black'"
         />
-        <polygon
-          v-else
-          :key="`polygon-selected${index}`"
-          :points="createPolygon(item.points)"
-          :stroke-width="`0.5px`"
-          :stroke="getStrokeColor(item)"
-          :fill="getFillColor(item)"
-        />
-      </template>
 
-      <circle
-        :r="5"
-        :cx="mousePosition.x"
-        :cy="mousePosition.y"
-        fill="black"
-      />
+        <g
+          v-for="(item, index) in mapDataProvider.mapItems"
+          :key="`group${index}`"
+        >
 
-      <g
-        v-for="(item, index) in mapDataProvider.mapItems"
-        :key="`group${index}`"
-      >
-        <!-- <text
-                v-if="item.active || isSelected(item)"
-                :x="getCenterPoint(item.points).x"
-                :y="getCenterPoint(item.points).y"
-                dominant-baseline="middle"
-                text-anchor="middle"
-                :font-size="hover ? '0.8em' : '1.0em'"
-                :fill="isSelected(item) ? '#000000' : '#bbbbbb'"
-            >{{ item.name }}
-            </text> -->
+          <text
+            v-if="isHover(item)"
+            :x="getCenterPoint(item.points).x"
+            :y="getCenterPoint(item.points).y"
+            dominant-baseline="middle"
+            text-anchor="middle"
+            font-size="1.5em"
+            fill="#000000"
+          >{{ item.name }}
+          </text>
 
-        <text
-          v-if="isHover(item)"
-          :x="getCenterPoint(item.points).x"
-          :y="getCenterPoint(item.points).y"
-          dominant-baseline="middle"
-          text-anchor="middle"
-          font-size="1.5em"
-          fill="#000000"
-        >{{ item.name }}
-        </text>
+          <!-- Top level elements required for mouseover/mouseout work -->
+          <polygon
+            :points="createPolygon(item.points)"
+            :stroke="'transparent'"
+            :fill="'transparent'"
+            @click="selectItem(item.name)"
+            @mouseover="mouseOver(item)"
+            @mouseout="mouseOut()"
+          />
+        </g>
 
-        <!-- Top level elements required for mouseover/mouseout work -->
-        <polygon
-          :points="createPolygon(item.points)"
-          :stroke="'transparent'"
-          :fill="'transparent'"
-          @click="selectItem(item.name)"
-          @mouseover="mouseOver(item)"
-          @mouseout="mouseOut()"
-        />
       </g>
 
-    </g>
+    </svg>
+  </div>
 
-  </svg>
-
-  <div>
+  <div class="q-mt-sm q-ml-sm q-gutter-sm">
     <q-btn
+      color="grey-8"
+      unelevated
       label="Reset Zoom"
       @click="resetZoom()"
+    />
+
+    <q-btn
+      v-show="!isMapDownload"
+      color="secondary"
+      unelevated
+      label="Download"
+      :loading="isMapDownload"
+      @click="download()"
     />
   </div>
 
   <div
-    class="row"
+    class="q-mt-sm q-ml-sm row"
     style="height: 50px;"
   >
     <div class="col-3">
-      CurrentPosition<br>{{ currentPosition.x }} / {{ currentPosition.y }}
+      <div class="text-caption">
+        Current Position
+      </div>
+      {{ currentPosition.x }} / {{ currentPosition.y }}
     </div>
     <div class="col-3">
-      Mouse Position<br>
+      <div class="text-caption">
+        Mouse Position
+      </div>
       {{ mousePosition.x }} / {{ mousePosition.y }}
     </div>
     <div class="col-2">
-      ViewBox<br>{{ viewBox }}
+      <div class="text-caption">
+        ViewBox
+      </div>
+      {{ viewBox }}
     </div>
     <div class="col-2">
-      Zoom<br>{{ tempZoom }}
+      <div class="text-caption">
+        Zoom
+      </div>
+      {{ tempZoom }}
     </div>
   </div>
 </template>

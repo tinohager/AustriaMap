@@ -36,9 +36,7 @@ function newItemAdded (item: DataItem) {
 
 <template>
   <q-page>
-    <q-splitter
-      v-model="splitterModel"
-    >
+    <q-splitter v-model="splitterModel">
       <template #before>
         <q-tabs
           v-model="tab"
@@ -61,6 +59,7 @@ function newItemAdded (item: DataItem) {
             label="Test"
           />
         </q-tabs>
+
         <SelectionGrid
           :data-items="dataItems"
           @new-item-added="newItemAdded"
@@ -72,7 +71,10 @@ function newItemAdded (item: DataItem) {
           v-model="tab"
           vertical
         >
-          <q-tab-panel name="vorarlberg">
+          <q-tab-panel
+            name="vorarlberg"
+            class="q-pa-none"
+          >
             <SvgMapView
               :map-data-provider="vorarlbergDataProvider"
               :zoom="1"
@@ -80,7 +82,10 @@ function newItemAdded (item: DataItem) {
             />
           </q-tab-panel>
 
-          <q-tab-panel name="austria">
+          <q-tab-panel
+            name="austria"
+            class="q-pa-none"
+          >
             <SvgMapView
               :map-data-provider="austriaDataProvider"
               :zoom="1"
@@ -88,7 +93,10 @@ function newItemAdded (item: DataItem) {
             />
           </q-tab-panel>
 
-          <q-tab-panel name="test">
+          <q-tab-panel
+            name="test"
+            class="q-pa-none"
+          >
             <SvgMapView
               :map-data-provider="testDataProvider"
               :zoom="1"

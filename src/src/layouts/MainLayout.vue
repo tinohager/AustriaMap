@@ -3,13 +3,10 @@
 
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header
-      elevated
-      class="bg-black"
-    >
+    <q-header class="bg-black">
       <q-toolbar>
         <q-toolbar-title>
-          Austria Magic Map
+          Austria Map
         </q-toolbar-title>
 
         <div>Quasar v{{ $q.version }}</div>
