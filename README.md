@@ -46,4 +46,4 @@ This project is licensed under the MIT License.
 
 ## Special Thanks
 Thank you for your interest in AustriaMap! We hope our application will be helpful in creating and analyzing heatmaps.
-This project wouldn't have been possible without the collaborative spirit of the "Umma Hüsla Hackathon" and the contributions of Florian Bischof.
+This project wouldn't have been possible without the collaborative spirit of the "Umma Hüsla Hackathon" and the contributions of [Florian Bischof](https://github.com/Falke-Design).
