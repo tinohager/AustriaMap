@@ -223,7 +223,7 @@ function wheelChanged (e: WheelEvent) {
   const currentMousePositionY = mousePosition.value.y
 
   // set the scaling factor (and make sure it's at least 10%)
-  let scale = tempZoom.value + (e.deltaY / 1000)
+  let scale = tempZoom.value + (e.deltaY / -1000)
   scale = Math.abs(scale) < 0.1 ? 0.1 : scale
 
   tempZoom.value = scale // (e.deltaY / 1000) * -1
