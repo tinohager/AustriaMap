@@ -6,9 +6,10 @@ With AustriaMap, you can easily create heatmaps to visually represent and analyz
 
 ## Features
 
-- Vector-Based Mapping: Access precise and scalable mapping data stored in vectors.
-- Heatmap Creation: Generate impressive heatmaps to visualize data patterns and trends.
-- Interactive Web Application: Utilize our intuitive web application to browse maps and create heatmaps.
+- *Vector-Based Mapping**: Access precise and scalable mapping data stored in vectors.
+- **Heatmap Creation**: Generate impressive heatmaps to visually represent and analyze geographical data.
+- **Interactive Web Application**: Utilize our intuitive web application to browse maps and create heatmaps.
+- **Save Maps as PNG**: Save your maps as PNG images for easy sharing and integration.
 
 ## Example Maps
 
