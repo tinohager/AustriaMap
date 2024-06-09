@@ -357,6 +357,13 @@ function scaleConversion (value: number, min: number, max: number): number {
         />
       </template>
 
+      <circle
+        :r="5"
+        :cx="mousePosition.x"
+        :cy="mousePosition.y"
+        fill="black"
+      />
+
       <g
         v-for="(item, index) in mapDataProvider.mapItems"
         :key="`group${index}`"
@@ -383,6 +390,7 @@ function scaleConversion (value: number, min: number, max: number): number {
         >{{ item.name }}
         </text>
 
+        <!-- Top level elements required for mouseover/mouseout work -->
         <polygon
           :points="createPolygon(item.points)"
           :stroke="'transparent'"
@@ -393,12 +401,6 @@ function scaleConversion (value: number, min: number, max: number): number {
         />
       </g>
 
-      <circle
-        :r="5"
-        :cx="mousePosition.x"
-        :cy="mousePosition.y"
-        fill="black"
-      />
     </g>
 
   </svg>
