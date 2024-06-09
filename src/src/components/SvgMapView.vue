@@ -163,10 +163,14 @@ function getCenterPoint (points: MapItemPoint[]) {
 }
 
 function calculateViewBox () {
-  const xMin = Math.min(...props.mapDataProvider.mapItems.map(mapItem => Math.min(...mapItem.points.map(point => point.x))))
-  const xMax = Math.max(...props.mapDataProvider.mapItems.map(mapItem => Math.max(...mapItem.points.map(point => point.x))))
-  const yMin = Math.min(...props.mapDataProvider.mapItems.map(mapItem => Math.min(...mapItem.points.map(point => point.y))))
-  const yMax = Math.max(...props.mapDataProvider.mapItems.map(mapItem => Math.max(...mapItem.points.map(point => point.y))))
+  const points = props.mapDataProvider.mapItems.flatMap(mapItem => mapItem.points)
+  const xPoints = points.map(point => point.x)
+  const yPoints = points.map(point => point.y)
+
+  const xMin = Math.min(...xPoints)
+  const xMax = Math.max(...xPoints)
+  const yMin = Math.min(...yPoints)
+  const yMax = Math.max(...yPoints)
 
   const padding = 0
   const precision = 3
@@ -205,7 +209,7 @@ function mouseMove (e: MouseEvent) {
   const differenceX = mousePosition.value.x - startPosition.value.x
   const differenceY = mousePosition.value.y - startPosition.value.y
 
-  const smoothingFactor = 10
+  const smoothingFactor = 5 / tempZoom.value
   currentPosition.value.x += mathHelper.roundTo(differenceX / smoothingFactor, 4)
   currentPosition.value.y += mathHelper.roundTo(differenceY / smoothingFactor, 4)
 
@@ -241,6 +245,13 @@ function wheelChanged (e: WheelEvent) {
   nextTick(() => {
     setMousePosition(e.clientX, e.clientY)
   })
+}
+
+function resetZoom () {
+  tempZoom.value = 1
+  currentPosition.value.x = 0
+  currentPosition.value.y = 0
+  calculateViewBox()
 }
 
 function convertScreenPosition (screenX: number, screenY: number) {
@@ -318,7 +329,7 @@ function scaleConversion (value: number, min: number, max: number): number {
     style="background-color: grey; border:2px solid #ddd;"
 
     width="100%"
-    height="100%"
+    height="80vh"
     preserveAspectRatio="xMinYMin meet"
 
     @mousedown="mouseDown"
@@ -391,6 +402,13 @@ function scaleConversion (value: number, min: number, max: number): number {
     </g>
 
   </svg>
+
+  <div>
+    <q-btn
+      label="Reset Zoom"
+      @click="resetZoom()"
+    />
+  </div>
 
   <div
     class="row"

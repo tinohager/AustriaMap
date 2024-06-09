@@ -75,7 +75,7 @@ function newItemAdded (item: DataItem) {
           <q-tab-panel name="vorarlberg">
             <SvgMapView
               :map-data-provider="vorarlbergDataProvider"
-              :zoom="0.8"
+              :zoom="1"
               :data-items="dataItems"
             />
           </q-tab-panel>
@@ -83,7 +83,7 @@ function newItemAdded (item: DataItem) {
           <q-tab-panel name="austria">
             <SvgMapView
               :map-data-provider="austriaDataProvider"
-              :zoom="0.7"
+              :zoom="1"
               :data-items="dataItems"
             />
           </q-tab-panel>
@@ -91,7 +91,7 @@ function newItemAdded (item: DataItem) {
           <q-tab-panel name="test">
             <SvgMapView
               :map-data-provider="testDataProvider"
-              :zoom="0.7"
+              :zoom="1"
             />
           </q-tab-panel>
         </q-tab-panels>
