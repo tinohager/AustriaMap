@@ -21,21 +21,15 @@ const props = defineProps<Props>()
 const selected = ref<string | undefined>(undefined)
 const hover = ref<string | undefined>(undefined)
 const svgRef = ref<SVGSVGElement>()
+
 const isMouseDown = ref(false)
 const viewBox = ref('')
 
-const mousePosition = ref({ x: 0, y: 0 })
-
 const tempZoom = ref(props.zoom || 1)
 
-const currentPosition = ref({
-  x: 0,
-  y: 0
-})
-const startPosition = ref({
-  x: 0,
-  y: 0
-})
+const mousePosition = ref({ x: 0, y: 0 })
+const currentPosition = ref({ x: 0, y: 0 })
+const startPosition = ref({ x: 0, y: 0 })
 
 onMounted(() => {
   document.addEventListener('mouseup', mouseUp)
