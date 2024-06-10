@@ -5,28 +5,59 @@ import { dataProvider as austriaDataProvider } from '../dataProviders/austriaDat
 import { dataProvider as vorarlbergDataProvider } from '../dataProviders/vorarlbergDataProvider'
 import { dataProvider as testDataProvider } from '../dataProviders/testDataProvider'
 
+import { DataItem } from 'src/models/DataItem'
+import { MapConfiguration } from 'src/models/MapConfiguration'
+
 import SvgMapView from 'components/SvgMapView.vue'
 import SelectionGrid from 'components/SelectionGrid.vue'
-import { DataItem } from 'src/models/DataItem'
+import MapConfigurator from 'components/MapConfigurator.vue'
 
 const splitterModel = ref(20)
 const tab = ref('austria')
 
 const dataItems = ref<DataItem[]>([
   {
-    key: 'Kennelbach',
-    value: 1
+    key: 'Burgenland',
+    value: 8
   },
   {
-    key: 'Dornbirn',
+    key: 'Kärnten',
+    value: 60
+  },
+  {
+    key: 'Niederösterreich',
+    value: 60
+  },
+  {
+    key: 'Oberösterreich',
+    value: 60
+  },
+  {
+    key: 'Salzburg',
+    value: 60
+  },
+  {
+    key: 'Steiermark',
     value: 30
   },
-
   {
-    key: 'Bregenz',
-    value: 60
+    key: 'Tirol',
+    value: 100
+  },
+  {
+    key: 'Vorarlberg',
+    value: 200
+  },
+  {
+    key: 'Wien',
+    value: 30
   }
 ])
+
+const mapConfiguration = ref<MapConfiguration>({
+  areaNameVisible: true,
+  areaNameFontSize: 18
+})
 
 function newItemAdded (item: DataItem) {
   dataItems.value.push(item)
@@ -64,6 +95,8 @@ function newItemAdded (item: DataItem) {
           :data-items="dataItems"
           @new-item-added="newItemAdded"
         />
+
+        <MapConfigurator :configuration="mapConfiguration" />
       </template>
 
       <template #after>
@@ -78,6 +111,7 @@ function newItemAdded (item: DataItem) {
             <SvgMapView
               :map-data-provider="vorarlbergDataProvider"
               :zoom="1"
+              :map-configuration="mapConfiguration"
               :data-items="dataItems"
             />
           </q-tab-panel>
@@ -89,6 +123,7 @@ function newItemAdded (item: DataItem) {
             <SvgMapView
               :map-data-provider="austriaDataProvider"
               :zoom="1"
+              :map-configuration="mapConfiguration"
               :data-items="dataItems"
             />
           </q-tab-panel>
@@ -100,6 +135,7 @@ function newItemAdded (item: DataItem) {
             <SvgMapView
               :map-data-provider="testDataProvider"
               :zoom="1"
+              :map-configuration="mapConfiguration"
             />
           </q-tab-panel>
         </q-tab-panels>

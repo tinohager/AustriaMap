@@ -6,6 +6,7 @@ import { mathHelper } from 'src/helpers/mathHelper'
 import { MapItem, MapItemPoint } from 'src/models/MapItem'
 import { MapDataProvider } from 'src/models/MapDataProvider'
 import { DataItem } from 'src/models/DataItem'
+import { MapConfiguration } from 'src/models/MapConfiguration'
 
 const emit = defineEmits(['selectionchanged', 'zoomchanged'])
 
@@ -13,6 +14,7 @@ export interface Props {
   mapDataProvider: MapDataProvider
   zoom?: number
   heatmapData?: Map<string, number>
+  mapConfiguration: MapConfiguration
   dataItems?: DataItem[]
 }
 
@@ -20,6 +22,7 @@ const props = defineProps<Props>()
 
 const svgRef = ref<SVGSVGElement>()
 
+const showDebug = ref(false)
 const isMouseDown = ref(false)
 const viewBox = ref('')
 const isMapDownload = ref(false)
@@ -121,8 +124,7 @@ function getFillColor (item: MapItem) {
     return '#dddddd'
   }
 
-  //   console.log('FILL', item.name)
-  const dataItem = props.dataItems?.find(o => o.key === item.name)
+  const dataItem = props.dataItems?.find(o => o.key.toLowerCase() === item.name.toLowerCase())
   if (dataItem?.value && minMaxValues?.value?.min) {
     return valueToHexColor(dataItem.value, minMaxValues.value.min, minMaxValues.value.max)
   }
@@ -255,7 +257,11 @@ async function download () {
 
   resetZoom()
   await nextTick(async () => {
-    await prepareImage()
+    try {
+      await prepareImage()
+    } catch (error) {
+      console.error(error)
+    }
     isMapDownload.value = false
   })
 
@@ -287,9 +293,16 @@ async function prepareImage () {
   image.height = height
   image.src = url
 
-  await new Promise((resolve) => {
-    image.onload = resolve
-  })
+  try {
+    await new Promise((resolve, reject) => {
+      image.onload = resolve
+      image.onerror = reject
+    })
+  } catch (error) {
+    console.error('Error loading image:', error)
+  } finally {
+    DOMURL.revokeObjectURL(url)
+  }
 
   const canvas = document.createElement('canvas')
   canvas.width = image.width
@@ -301,7 +314,6 @@ async function prepareImage () {
   }
 
   ctx.drawImage(image, 0, 0, width, height)
-  DOMURL.revokeObjectURL(url)
 
   const imgURI = canvas
     .toDataURL('image/png')
@@ -391,7 +403,7 @@ function scaleConversion (value: number, min: number, max: number): number {
       version="1.0"
       xmlns="http://www.w3.org/2000/svg"
       :viewBox="viewBox"
-      style="width: 100%; height: 80vh;"
+      style="width: 100%; height: 87vh;"
 
       @mousedown="mouseDown"
       @mousemove="mouseMove"
@@ -431,12 +443,13 @@ function scaleConversion (value: number, min: number, max: number): number {
         >
 
           <text
-            v-if="isHover(item)"
+            v-if="isHover(item) || mapConfiguration.areaNameVisible"
             :x="getCenterPoint(item.points).x"
             :y="getCenterPoint(item.points).y"
             dominant-baseline="middle"
             text-anchor="middle"
-            font-size="1.5em"
+            font-family="Poppins"
+            :font-size="`${mapConfiguration.areaNameFontSize}px`"
             fill="#000000"
           >{{ item.name }}
           </text>
@@ -459,6 +472,15 @@ function scaleConversion (value: number, min: number, max: number): number {
 
   <div class="q-mt-sm q-ml-sm q-gutter-sm">
     <q-btn
+      v-show="!isMapDownload"
+      color="secondary"
+      unelevated
+      label="Download Map"
+      :loading="isMapDownload"
+      @click="download()"
+    />
+
+    <q-btn
       color="grey-8"
       unelevated
       label="Reset Zoom"
@@ -466,42 +488,41 @@ function scaleConversion (value: number, min: number, max: number): number {
     />
 
     <q-btn
-      v-show="!isMapDownload"
-      color="secondary"
+      color="grey-8"
       unelevated
-      label="Download"
-      :loading="isMapDownload"
-      @click="download()"
+      icon="bug_report"
+      @click="showDebug = !showDebug"
     />
   </div>
 
   <div
-    class="q-mt-sm q-ml-sm row"
-    style="height: 50px;"
+    v-if="showDebug"
+    style="position: fixed; bottom: 10px; right: 10px; height: 200px; width: 300px;"
+    class="bg-grey-3 q-pa-md"
   >
-    <div class="col-3">
+    <div>
       <div class="text-caption">
         Current Position
       </div>
-      {{ currentPosition.x }} / {{ currentPosition.y }}
+      {{ currentPosition.x.toFixed(4) }} / {{ currentPosition.y.toFixed(4) }}
     </div>
-    <div class="col-3">
+    <div>
       <div class="text-caption">
         Mouse Position
       </div>
       {{ mousePosition.x }} / {{ mousePosition.y }}
     </div>
-    <div class="col-2">
+    <div>
       <div class="text-caption">
         ViewBox
       </div>
       {{ viewBox }}
     </div>
-    <div class="col-2">
+    <div>
       <div class="text-caption">
         Zoom
       </div>
-      {{ tempZoom }}
+      {{ tempZoom.toFixed(2) }}
     </div>
   </div>
 </template>

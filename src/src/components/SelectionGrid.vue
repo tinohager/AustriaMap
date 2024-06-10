@@ -65,12 +65,16 @@ function onClick () {
           <q-item-section>
             <q-input
               v-model="item.key "
+              square
+              dense
               filled
               type="text"
             />
           </q-item-section>
           <q-input
             v-model="item.value"
+            square
+            dense
             filled
             type="number"
             style="width: 80px"
@@ -91,11 +95,15 @@ function onClick () {
       >
         <q-input
           v-model="newItem.key"
+          square
+          dense
           filled
           type="text"
         />
         <q-input
           v-model="newItem.value"
+          square
+          dense
           filled
           type="number"
           style="width: 80px"
