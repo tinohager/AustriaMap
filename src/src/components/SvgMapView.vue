@@ -267,10 +267,10 @@ async function prepareImage () {
     return
   }
 
-  const imageScale = 5
+  const imageScale = 2
 
-  const width = svgRef.value.width.baseVal.value * imageScale
-  const height = svgRef.value.height.baseVal.value * imageScale
+  const width = svgRef.value.viewBox.baseVal.width * imageScale
+  const height = svgRef.value.viewBox.baseVal.height * imageScale
 
   const serializer = new XMLSerializer()
   const svgString = serializer.serializeToString(svgRef.value)
@@ -300,7 +300,7 @@ async function prepareImage () {
     return
   }
 
-  ctx.drawImage(image, 0, 0)
+  ctx.drawImage(image, 0, 0, width, height)
   DOMURL.revokeObjectURL(url)
 
   const imgURI = canvas
