@@ -9,7 +9,13 @@
           Austria Map
         </q-toolbar-title>
 
-        <div>Quasar v{{ $q.version }}</div>
+        <q-btn
+          stretch
+          unelevated
+          href="https://github.com/tinohager/AustriaMap"
+          icon="code"
+          label="GitHub"
+        />
       </q-toolbar>
     </q-header>
 
