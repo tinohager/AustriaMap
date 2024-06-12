@@ -14,7 +14,7 @@ export interface Props {
   mapDataProvider: MapDataProvider
   zoom?: number
   heatmapData?: Map<string, number>
-  mapConfiguration: MapConfiguration
+  mapConfiguration: MapConfiguration | undefined
   dataItems?: DataItem[]
 }
 
@@ -443,13 +443,13 @@ function scaleConversion (value: number, min: number, max: number): number {
         >
 
           <text
-            v-if="isHover(item) || mapConfiguration.areaNameVisible"
+            v-if="isHover(item) || (mapConfiguration?.areaNameVisible ?? false)"
             :x="getCenterPoint(item.points).x"
             :y="getCenterPoint(item.points).y"
             dominant-baseline="middle"
             text-anchor="middle"
             font-family="Poppins"
-            :font-size="`${mapConfiguration.areaNameFontSize}px`"
+            :font-size="`${(mapConfiguration?.areaNameFontSize ?? 1)}px`"
             fill="#000000"
           >{{ item.name }}
           </text>

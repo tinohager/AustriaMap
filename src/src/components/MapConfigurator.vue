@@ -53,6 +53,7 @@ const configuration = computed<MapConfiguration>({
             v-model="configuration.areaNameFontSize"
             :min="20"
             :max="200"
+            thumb-size="35px"
           />
         </q-item-section>
       </q-item>
