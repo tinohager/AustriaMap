@@ -10,7 +10,6 @@ import { MapConfiguration } from 'src/models/MapConfiguration'
 
 import SvgMapView from 'components/SvgMapView.vue'
 import SelectionGrid from 'components/SelectionGrid.vue'
-// import MapConfigurator from 'components/MapConfigurator.vue'
 
 const splitterModel = ref(20)
 const tab = ref('austria')
@@ -55,10 +54,6 @@ const dataItems = ref<DataItem[]>([
 ])
 
 const mapConfiguration = inject<MapConfiguration>('mapConfiguration')
-// const mapConfiguration = ref<MapConfiguration>({
-//   areaNameVisible: true,
-//   areaNameFontSize: 18
-// })
 
 function newItemAdded (item: DataItem) {
   dataItems.value.push(item)

@@ -8,7 +8,7 @@ import MapConfigurator from 'src/components/MapConfigurator.vue'
 const leftDrawerOpen = ref(false)
 const mapConfiguration = ref<MapConfiguration>({
   areaNameVisible: true,
-  areaNameFontSize: 100
+  areaNameFontSize: 30
 })
 
 provide('mapConfiguration', mapConfiguration)

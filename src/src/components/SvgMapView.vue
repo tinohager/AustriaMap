@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
 
 import { mathHelper } from 'src/helpers/mathHelper'
 
@@ -26,6 +26,7 @@ const showDebug = ref(false)
 const isMouseDown = ref(false)
 const viewBox = ref('')
 const isMapDownload = ref(false)
+const showMousePosition = ref(false)
 
 const selected = ref<string | undefined>(undefined)
 const hover = ref<string | undefined>(undefined)
@@ -45,16 +46,22 @@ onBeforeUnmount(() => {
   document.removeEventListener('mouseup', mouseUp)
 })
 
-const minMaxValues = ref(getMinAndMaxValues(props.dataItems))
-// Watch for changes in dataItems and update minMaxValues
-watch(() => props.dataItems, (newDataItems) => {
-  minMaxValues.value = getMinAndMaxValues(newDataItems)
-}, { deep: true })
+// const minMaxValues = ref(getMinAndMaxValues(props.dataItems))
+// // Watch for changes in dataItems and update minMaxValues
+// watch(() => props.dataItems, (newDataItems) => {
+//   minMaxValues.value = getMinAndMaxValues(newDataItems)
+// }, { deep: true })
 
-// Function to get the min and max values
-function getMinAndMaxValues (items: DataItem[] | undefined) {
+// // Function to get the min and max values
+// function getMinAndMaxValues (items: DataItem[] | undefined) {
+
+// }
+
+const minMaxValues = computed(() => {
+  const items = props.dataItems
+
   if (!Array.isArray(items) || items.length === 0 || !items[0]) {
-    return { min: null, max: null }
+    return { min: 0, max: 0 }
   }
 
   const values = items.filter(o => o.value).map(o => o.value ?? 0)
@@ -63,7 +70,7 @@ function getMinAndMaxValues (items: DataItem[] | undefined) {
   const max = Math.max(...values) + 10
 
   return { min, max }
-}
+})
 
 function createPolygon (points: MapItemPoint[]) {
   if (!points.length) {
@@ -125,7 +132,7 @@ function getFillColor (item: MapItem) {
   }
 
   const dataItem = props.dataItems?.find(o => o.key.toLowerCase() === item.name.toLowerCase())
-  if (dataItem?.value && minMaxValues?.value?.min) {
+  if (dataItem?.value) {
     return valueToHexColor(dataItem.value, minMaxValues.value.min, minMaxValues.value.max)
   }
 
@@ -170,7 +177,7 @@ function calculateViewBox () {
   const yMin = Math.min(...yPoints)
   const yMax = Math.max(...yPoints)
 
-  const padding = 0
+  const padding = 30
   const precision = 3
 
   const width = mathHelper.roundTo(xMax - xMin + padding, precision)
@@ -255,6 +262,8 @@ function resetZoom () {
 async function download () {
   isMapDownload.value = true
 
+  await prepareImage()
+
   resetZoom()
   await nextTick(async () => {
     try {
@@ -334,13 +343,13 @@ function triggerDownload (imgURI : string) {
 function convertScreenPosition (screenX: number, screenY: number) {
   const svgMatrix = svgRef.value?.getScreenCTM()?.inverse()
   if (!svgMatrix) {
-    console.log('failure')
+    console.error('failure')
     return { x: 0, y: 0 }
   }
 
   const svgPoint = svgRef.value?.createSVGPoint()
   if (!svgPoint) {
-    console.log('failure')
+    console.error('failure')
     return { x: 0, y: 0 }
   }
 
@@ -363,6 +372,7 @@ function setMousePosition (x: number, y: number) {
 
 function valueToHexColor (value: number, min: number, max: number) {
   const scaleValue = scaleConversion(value, min, max)
+
   return percentToHex(100 - scaleValue)
 }
 
@@ -431,6 +441,7 @@ function scaleConversion (value: number, min: number, max: number): number {
         </template>
 
         <circle
+          v-if="showMousePosition"
           :r="5"
           :cx="mousePosition.x"
           :cy="mousePosition.y"
