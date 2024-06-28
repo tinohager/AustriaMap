@@ -41,6 +41,9 @@ quasar dev
 - https://inkscape.org
 - https://svgomg.net
 
+## Related projects
+- [datamaps](https://github.com/markmarkoh/datamaps)
+
 ## License
 This project is licensed under the MIT License.
 
