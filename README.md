@@ -43,6 +43,7 @@ quasar dev
 
 ## Related projects
 - [datamaps](https://github.com/markmarkoh/datamaps)
+- [chartjs-chart-geo](https://github.com/sgratzl/chartjs-chart-geo)
 
 ## License
 This project is licensed under the MIT License.
