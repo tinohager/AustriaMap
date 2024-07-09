@@ -1,6 +1,6 @@
-# AustriaMap
-Welcome to AustriaMap, a project that provides mapping data in vector format and makes it accessible through a user-friendly web application.
-With AustriaMap, you can easily create heatmaps to visually represent and analyze geographical data.
+# Austria Map
+Welcome to Austria Map, a project that provides mapping data in vector format and makes it accessible through a user-friendly web application.
+With Austria Map, you can easily create heatmaps to visually represent and analyze geographical data.
 
 **[Demo WebApp](https://tinohager.github.io/AustriaMap/)**
 
